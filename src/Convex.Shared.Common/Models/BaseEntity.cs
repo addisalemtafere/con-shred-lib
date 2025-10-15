@@ -5,23 +5,12 @@ namespace Convex.Shared.Common.Models;
 /// </summary>
 public abstract class BaseEntity
 {
-    /// <summary>
-    /// Unique identifier for the entity
-    /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    /// <summary>
-    /// Date and time when the entity was created
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Date and time when the entity was last updated
-    /// </summary>
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Soft delete flag
-    /// </summary>
-    public bool IsDeleted { get; set; } = false;
+    public required string CreatedBy { get; set; }
+    public required DateTime CreatedAt { get; set; }
+    public required string CreatedWs { get; set; }
+    public required string LastModifiedBy { get; set; }
+    public required DateTime LastModifiedAt { get; set; }
+    public required string LastModifiedWs { get; set; }
 }
