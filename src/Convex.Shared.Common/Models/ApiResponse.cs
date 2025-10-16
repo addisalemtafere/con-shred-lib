@@ -1,75 +1,103 @@
+using System.Text.Json.Serialization;
+
 namespace Convex.Shared.Common.Models;
 
 /// <summary>
-/// Standard API response wrapper
+/// Generic API response wrapper for all Convex APIs
 /// </summary>
-/// <typeparam name="T">The type of data being returned</typeparam>
+/// <typeparam name="T">The data type</typeparam>
 public class ApiResponse<T>
 {
-    /// <summary>
-    /// Indicates if the operation was successful
-    /// </summary>
-    public bool Success { get; set; }
+    [JsonPropertyName("success")]
+    public bool Success { get; set; } = true;
 
-    /// <summary>
-    /// The response data
-    /// </summary>
+    [JsonPropertyName("data")]
     public T? Data { get; set; }
 
-    /// <summary>
-    /// Error message if the operation failed
-    /// </summary>
-    public string? Error { get; set; }
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
 
-    /// <summary>
-    /// Additional error details
-    /// </summary>
-    public Dictionary<string, string>? Errors { get; set; }
+    [JsonPropertyName("metadata")]
+    public ResponseMetadata? Metadata { get; set; }
+}
 
-    /// <summary>
-    /// Response timestamp
-    /// </summary>
+/// <summary>
+/// API response metadata
+/// </summary>
+public class ResponseMetadata
+{
+    [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    /// <summary>
-    /// Creates a successful response
-    /// </summary>
-    /// <param name="data">The response data</param>
-    /// <returns>Successful API response</returns>
-    public static ApiResponse<T> SuccessResult(T data)
+    [JsonPropertyName("requestId")]
+    public string? RequestId { get; set; }
+
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
+
+    [JsonPropertyName("correlationId")]
+    public string? CorrelationId { get; set; }
+
+    [JsonPropertyName("pagination")]
+    public PaginationMetadata? Pagination { get; set; }
+}
+
+/// <summary>
+/// Pagination metadata for paginated responses
+/// </summary>
+public class PaginationMetadata
+{
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; set; }
+
+    [JsonPropertyName("totalPages")]
+    public int TotalPages { get; set; }
+
+    [JsonPropertyName("totalCount")]
+    public long TotalCount { get; set; }
+
+    [JsonPropertyName("hasNext")]
+    public bool HasNext { get; set; }
+
+    [JsonPropertyName("hasPrevious")]
+    public bool HasPrevious { get; set; }
+
+    [JsonPropertyName("nextPageUrl")]
+    public string? NextPageUrl { get; set; }
+
+    [JsonPropertyName("previousPageUrl")]
+    public string? PreviousPageUrl { get; set; }
+}
+
+/// <summary>
+/// Paginated response wrapper
+/// </summary>
+/// <typeparam name="T">The data type</typeparam>
+public class PaginatedResponse<T> : ApiResponse<IEnumerable<T>>
+{
+    public PaginatedResponse()
     {
-        return new ApiResponse<T>
-        {
-            Success = true,
-            Data = data
-        };
+        Metadata = new ResponseMetadata();
     }
 
-    /// <summary>
-    /// Creates an error response
-    /// </summary>
-    /// <param name="error">The error message</param>
-    /// <returns>Error API response</returns>
-    public static ApiResponse<T> ErrorResult(string error)
+    public PaginatedResponse(IEnumerable<T> data, int page, int pageSize, long totalCount)
     {
-        return new ApiResponse<T>
+        Success = true;
+        Data = data;
+        Metadata = new ResponseMetadata
         {
-            Success = false,
-            Error = error
-        };
-    }
-
-    /// <summary>
-    /// Creates an error response with multiple errors
-    /// </summary>
-    /// <param name="errors">Dictionary of errors</param>
-    /// <returns>Error API response</returns>
-    public static ApiResponse<T> ErrorResult(Dictionary<string, string> errors)
-    {
-        return new ApiResponse<T>
-        {
-            Success = false,
-            Errors = errors
+            Pagination = new PaginationMetadata
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                HasNext = page < (int)Math.Ceiling((double)totalCount / pageSize),
+                HasPrevious = page > 1
+            }
         };
     }
 }

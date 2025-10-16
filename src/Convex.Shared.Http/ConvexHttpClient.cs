@@ -151,4 +151,5 @@ public class ConvexHttpClient : IConvexHttpClient
             _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
     }
+
 }
