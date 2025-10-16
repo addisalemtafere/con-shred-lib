@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Convex.Shared.Common.Models
+namespace Convex.Shared.Domain.Domain
 {
     public abstract class BaseEntityWithTenant : BaseEntity<int>
     {

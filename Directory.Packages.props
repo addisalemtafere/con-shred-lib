@@ -5,7 +5,9 @@
   </PropertyGroup>
   <ItemGroup Label="Microsoft Extensions">
     <PackageVersion Include="MediatR" Version="13.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
@@ -14,6 +16,9 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Net.Http.Headers" Version="9.0.10" />
+    <PackageVersion Include="Npgsql" Version="9.0.1" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup Label="ASP.NET Core">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
@@ -38,14 +43,11 @@
   <ItemGroup Label="Security">
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
   </ItemGroup>
-
   <ItemGroup Label="gRPC">
     <PackageVersion Include="Grpc.AspNetCore" Version="2.62.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.62.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.25.1" />
   </ItemGroup>
-
-
   <ItemGroup Label="Hosting">
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
