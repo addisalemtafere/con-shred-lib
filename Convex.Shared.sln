@@ -22,9 +22,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Utilities", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Domain", "src\Convex.Shared.Domain\Convex.Shared.Domain.csproj", "{D113F74F-1DF5-5F7A-AC52-B633992B73A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Business", "src\Convex.Shared.Business\Convex.Shared.Business.csproj", "{E224F85G-2EG6-6G8B-BD63-C744003C84BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Business", "src\Convex.Shared.Business\Convex.Shared.Business.csproj", "{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Grpc", "src\Convex.Shared.Grpc\Convex.Shared.Grpc.csproj", "{F335F96H-3FH7-7H9C-CE74-D855114D95CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Grpc", "src\Convex.Shared.Grpc\Convex.Shared.Grpc.csproj", "{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,14 +72,14 @@ Global
 		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E224F85G-2EG6-6G8B-BD63-C744003C84BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E224F85G-2EG6-6G8B-BD63-C744003C84BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E224F85G-2EG6-6G8B-BD63-C744003C84BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E224F85G-2EG6-6G8B-BD63-C744003C84BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F335F96H-3FH7-7H9C-CE74-D855114D95CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F335F96H-3FH7-7H9C-CE74-D855114D95CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F335F96H-3FH7-7H9C-CE74-D855114D95CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F335F96H-3FH7-7H9C-CE74-D855114D95CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
