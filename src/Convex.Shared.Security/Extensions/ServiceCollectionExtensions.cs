@@ -75,14 +75,14 @@ public static class ServiceCollectionExtensions
 
                 options.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context =>
-                    {
-                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                OnAuthenticationFailed = context =>
                 {
-                    context.Response.Headers.Append("Token-Expired", "true");
-                }
-                        return Task.CompletedTask;
+                    if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                    {
+                        context.Response.Headers["Token-Expired"] = "true";
                     }
+                    return Task.CompletedTask;
+                }
                 };
             });
 

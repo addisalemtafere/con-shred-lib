@@ -1,4 +1,3 @@
-using Convex.Shared.Common.Models;
 
 namespace Convex.Shared.Logging.Interfaces;
 
@@ -76,4 +75,35 @@ public interface IConvexLogger
     /// <param name="message">The message to log</param>
     /// <param name="properties">Additional properties</param>
     void LogWithCorrelation(string correlationId, string message, params object[] properties);
+
+    /// <summary>
+    /// High-performance batch logging for billion-record scenarios
+    /// </summary>
+    /// <param name="messages">Batch of messages to log</param>
+    void LogBatch(params (string message, object[] properties)[] messages);
+
+    /// <summary>
+    /// Log exception with structured context
+    /// </summary>
+    /// <param name="exception">The exception to log</param>
+    /// <param name="message">Log message</param>
+    /// <param name="context">Additional context properties</param>
+    void LogException(Exception exception, string message, params object[] context);
+
+    /// <summary>
+    /// Log business exception with full context
+    /// </summary>
+    /// <param name="exception">The business exception</param>
+    /// <param name="correlationId">Request correlation ID</param>
+    /// <param name="userId">User ID if available</param>
+    /// <param name="requestId">Request ID</param>
+    void LogBusinessException(Exception exception, string? correlationId = null, string? userId = null, string? requestId = null);
+
+    /// <summary>
+    /// Log validation errors with structured format
+    /// </summary>
+    /// <param name="validationErrors">Validation errors</param>
+    /// <param name="correlationId">Request correlation ID</param>
+    /// <param name="userId">User ID if available</param>
+    void LogValidationErrors(object[] validationErrors, string? correlationId = null, string? userId = null);
 }
