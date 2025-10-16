@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Convex.Shared.Models</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Convex Team</Authors>
+    <Company>Convex</Company>
+    <Product>Convex Shared Models</Product>
+    <Description>Domain models and entities for Convex betting platform</Description>
+    <PackageTags>convex;betting;models;domain;entities</PackageTags>
+    <RepositoryUrl>https://github.com/convex/shared-libraries</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Only essential dependencies for data validation -->
+    <PackageReference Include="System.ComponentModel.Annotations" />
+  </ItemGroup>
+
+</Project>

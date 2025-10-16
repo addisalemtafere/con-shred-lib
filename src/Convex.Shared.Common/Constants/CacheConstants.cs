@@ -1,5 +1,9 @@
+
 ﻿namespace Convex.Shared.Common.Constants
 {
+    /// <summary>
+    /// Cache key constants
+    /// </summary>
     public static class CacheConstants
     {
         public const int DefaultExpirationMinutes = 15;
@@ -12,4 +16,5 @@
 
         public const string SessionCachePrefix = "session:";
     }
+
 }

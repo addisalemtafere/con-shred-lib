@@ -22,9 +22,12 @@
   <ItemGroup Label="Validation">
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup Label="Messaging">
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
+    <PackageVersion Include="KafkaFlow" Version="2.1.0" />
+    <PackageVersion Include="MediatR" Version="12.4.1" />
   </ItemGroup>
   <ItemGroup Label="Logging">
     <PackageVersion Include="Serilog" Version="4.0.0" />
@@ -35,8 +38,17 @@
   <ItemGroup Label="Security">
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
   </ItemGroup>
+
+  <ItemGroup Label="gRPC">
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.62.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.62.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.25.1" />
+  </ItemGroup>
+
+
   <ItemGroup Label="Hosting">
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

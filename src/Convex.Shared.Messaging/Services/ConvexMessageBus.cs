@@ -77,7 +77,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
         }
     }
 
-    public async Task<string> SubscribeAsync<T>(string topic, Func<T, Task> handler)
+    public Task<string> SubscribeAsync<T>(string topic, Func<T, Task> handler)
     {
         try
         {
@@ -112,15 +112,17 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
                 }
             }, cancellationTokenSource.Token);
             
-            return subscriptionId;
+            // Add a small delay to ensure subscription is set up
+            return Task.Delay(100, cancellationTokenSource.Token)
+                .ContinueWith(_ => subscriptionId, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         catch
         {
-            return string.Empty;
+            return Task.FromResult(string.Empty);
         }
     }
 
-    public async Task<bool> UnsubscribeAsync(string subscriptionId)
+    public Task<bool> UnsubscribeAsync(string subscriptionId)
     {
         try
         {
@@ -128,13 +130,16 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
             {
                 cancellationTokenSource.Cancel();
                 _subscriptions.Remove(subscriptionId);
-                return true;
+                
+                // Add a small delay to ensure cleanup is complete
+                return Task.Delay(50)
+                    .ContinueWith(_ => true, TaskContinuationOptions.OnlyOnRanToCompletion);
             }
-            return false;
+            return Task.FromResult(false);
         }
         catch
         {
-            return false;
+            return Task.FromResult(false);
         }
     }
 
@@ -149,6 +154,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
         // For Kafka, receive is the same as subscribe
         return SubscribeAsync(topic, handler).ContinueWith(t => !string.IsNullOrEmpty(t.Result));
     }
+
 
     public void Dispose()
     {

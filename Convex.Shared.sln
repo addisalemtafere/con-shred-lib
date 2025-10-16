@@ -16,6 +16,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Caching", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Messaging", "src\Convex.Shared.Messaging\Convex.Shared.Messaging.csproj", "{BC731A5E-F9A1-4D96-AD62-029101D833A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Models", "src\Convex.Shared.Models\Convex.Shared.Models.csproj", "{1AA218C8-1FA9-4093-8C8F-F42136B22E3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Utilities", "src\Convex.Shared.Utilities\Convex.Shared.Utilities.csproj", "{C002F63E-0CE4-4E69-9B41-A522881A6298}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Domain", "src\Convex.Shared.Domain\Convex.Shared.Domain.csproj", "{D113F74F-1DF5-5F7A-AC52-B633992B73A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Business", "src\Convex.Shared.Business\Convex.Shared.Business.csproj", "{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Shared.Grpc", "src\Convex.Shared.Grpc\Convex.Shared.Grpc.csproj", "{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +60,26 @@ Global
 		{BC731A5E-F9A1-4D96-AD62-029101D833A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC731A5E-F9A1-4D96-AD62-029101D833A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC731A5E-F9A1-4D96-AD62-029101D833A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AA218C8-1FA9-4093-8C8F-F42136B22E3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AA218C8-1FA9-4093-8C8F-F42136B22E3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AA218C8-1FA9-4093-8C8F-F42136B22E3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AA218C8-1FA9-4093-8C8F-F42136B22E3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C002F63E-0CE4-4E69-9B41-A522881A6298}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C002F63E-0CE4-4E69-9B41-A522881A6298}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C002F63E-0CE4-4E69-9B41-A522881A6298}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C002F63E-0CE4-4E69-9B41-A522881A6298}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D113F74F-1DF5-5F7A-AC52-B633992B73A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{923B2417-DFE2-4AEF-81A3-F3DE92C384BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C23B64E-1F1D-4CA3-9DD4-726D3F456979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

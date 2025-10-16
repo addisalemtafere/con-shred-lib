@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Convex.Shared.Utilities</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Convex Team</Authors>
+    <Company>Convex</Company>
+    <Product>Convex Shared Utilities</Product>
+    <Description>Utility functions and helper methods for Convex betting platform</Description>
+    <PackageTags>convex;betting;utilities;helpers;functions</PackageTags>
+    <RepositoryUrl>https://github.com/convex/shared-libraries</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>

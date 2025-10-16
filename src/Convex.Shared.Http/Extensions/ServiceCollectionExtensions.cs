@@ -1,8 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Http;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Convex.Shared.Http.Extensions;
 
@@ -79,7 +76,7 @@ public static class ServiceCollectionExtensions
         {
             client.BaseAddress = new Uri(baseAddress);
             client.Timeout = timeout ?? TimeSpan.FromSeconds(30);
-            
+
             if (!string.IsNullOrEmpty(apiKey))
             {
                 client.DefaultRequestHeaders.Add("X-API-Key", apiKey);

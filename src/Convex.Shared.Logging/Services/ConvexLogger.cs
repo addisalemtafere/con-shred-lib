@@ -5,19 +5,26 @@ using System.Diagnostics;
 namespace Convex.Shared.Logging.Services;
 
 /// <summary>
-/// Enhanced logger implementation for Convex microservices
+/// High-performance logger optimized for billion-record scenarios
 /// </summary>
 public class ConvexLogger : IConvexLogger
 {
     private readonly ILogger<ConvexLogger> _logger;
     private readonly string _serviceName;
     private readonly string _version;
+    private readonly int _processId;
+    private readonly string _machineName;
 
-    public ConvexLogger(ILogger<ConvexLogger> logger, string serviceName = "ConvexService", string version = "1.0.0")
+    public ConvexLogger(
+        ILogger<ConvexLogger> logger,
+        string serviceName = "ConvexService",
+        string version = "1.0.0")
     {
         _logger = logger;
         _serviceName = serviceName;
         _version = version;
+        _processId = Process.GetCurrentProcess().Id;
+        _machineName = Environment.MachineName;
     }
 
     public void LogInformation(string message, params object[] properties)
@@ -63,8 +70,8 @@ public class ConvexLogger : IConvexLogger
         };
 
         var allProperties = PrependStandardProperties(properties);
-        _logger.LogInformation("Performance: {Operation} completed in {Duration}ms", 
-            operation, duration.TotalMilliseconds, allProperties);
+        _logger.LogInformation("Performance: {Operation} completed in {Duration}ms",
+            allProperties);
     }
 
     public void LogBusinessEvent(string eventName, object data, params object[] properties)
@@ -77,8 +84,8 @@ public class ConvexLogger : IConvexLogger
         };
 
         var allProperties = PrependStandardProperties(properties);
-        _logger.LogInformation("Business Event: {EventName} - {Data}", 
-            eventName, data, allProperties);
+        _logger.LogInformation("Business Event: {EventName} - {Data}",
+            allProperties);
     }
 
     public void LogApiRequest(string method, string url, int statusCode, TimeSpan duration, params object[] properties)
@@ -94,8 +101,8 @@ public class ConvexLogger : IConvexLogger
 
         var logLevel = statusCode >= 400 ? LogLevel.Warning : LogLevel.Information;
         var allProperties = PrependStandardProperties(properties);
-        _logger.Log(logLevel, "API Request: {Method} {Url} - {StatusCode} in {Duration}ms", 
-            method, url, statusCode, duration.TotalMilliseconds, allProperties);
+        _logger.Log(logLevel, "API Request: {Method} {Url} - {StatusCode} in {Duration}ms",
+            allProperties);
     }
 
     public void LogWithCorrelation(string correlationId, string message, params object[] properties)
@@ -104,16 +111,66 @@ public class ConvexLogger : IConvexLogger
         _logger.LogInformation(message, PrependStandardProperties(correlationProperties));
     }
 
+    public void LogBatch(params (string message, object[] properties)[] messages)
+    {
+        // High-performance batch logging for billion-record scenarios
+        foreach (var (message, properties) in messages)
+        {
+            _logger.LogInformation(message, PrependStandardProperties(properties));
+        }
+    }
+
+    public void LogException(Exception exception, string message, params object[] context)
+    {
+        var properties = PrependStandardProperties(context);
+        _logger.LogError(exception, message, properties);
+    }
+
+    public void LogBusinessException(Exception exception, string? correlationId = null, string? userId = null, string? requestId = null)
+    {
+        var context = new List<object>();
+
+        if (!string.IsNullOrEmpty(correlationId))
+            context.AddRange(new object[] { "CorrelationId", correlationId });
+
+        if (!string.IsNullOrEmpty(userId))
+            context.AddRange(new object[] { "UserId", userId });
+
+        if (!string.IsNullOrEmpty(requestId))
+            context.AddRange(new object[] { "RequestId", requestId });
+
+        var properties = PrependStandardProperties(context.ToArray());
+        _logger.LogError(exception, "Business exception occurred: {ExceptionType}", exception.GetType().Name);
+    }
+
+    public void LogValidationErrors(object[] validationErrors, string? correlationId = null, string? userId = null)
+    {
+        var context = new List<object>();
+
+        if (!string.IsNullOrEmpty(correlationId))
+            context.AddRange(new object[] { "CorrelationId", correlationId });
+
+        if (!string.IsNullOrEmpty(userId))
+            context.AddRange(new object[] { "UserId", userId });
+
+        context.AddRange(new object[] { "ValidationErrors", validationErrors });
+
+        var properties = PrependStandardProperties(context.ToArray());
+        _logger.LogWarning("Validation errors occurred: {ErrorCount} errors", validationErrors.Length);
+    }
+
     private object[] PrependStandardProperties(object[] properties)
     {
-        var standardProperties = new object[]
-        {
-            _serviceName,
-            _version,
-            Environment.MachineName,
-            Process.GetCurrentProcess().Id
-        };
+        // Pre-allocate array for better performance with high-volume logging
+        var result = new object[4 + properties.Length];
+        result[0] = _serviceName;
+        result[1] = _version;
+        result[2] = _machineName;
+        result[3] = _processId;
 
-        return standardProperties.Concat(properties).ToArray();
+        // Copy properties array for better performance
+        Array.Copy(properties, 0, result, 4, properties.Length);
+
+        return result;
     }
 }

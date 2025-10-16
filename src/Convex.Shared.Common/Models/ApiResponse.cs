@@ -1,17 +1,30 @@
+using System.Text.Json.Serialization;
+
 namespace Convex.Shared.Common.Models;
 
 /// <summary>
-/// Standard API response wrapper
+/// Generic API response wrapper for all Convex APIs
 /// </summary>
-/// <typeparam name="T">The type of data being returned</typeparam>
+/// <typeparam name="T">The data type</typeparam>
 public class ApiResponse<T>
 {
+    [JsonPropertyName("success")]
     public bool Success { get; set; }
+
+    [JsonPropertyName("data")]
     public T? Data { get; set; }
-    public string? ErrorCode { get; set; }       
-    public string? ErrorMessage { get; set; }     
+
+    [JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; set; }
+
+    [JsonPropertyName("errorMessage")]
+    public string? ErrorMessage { get; set; }
+
+    [JsonPropertyName("errors")]
     public Dictionary<string, string>? Errors { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    [JsonPropertyName("metadata")]
+    public ResponseMetadata Metadata { get; set; } = new();
 
     // Convert from Result<T> to ApiResponse<T>
     public static ApiResponse<T> FromResult(Result<T> result)

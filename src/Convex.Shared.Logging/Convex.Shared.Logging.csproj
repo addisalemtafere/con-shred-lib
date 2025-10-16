@@ -28,9 +28,6 @@
     <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Convex.Shared.Common\Convex.Shared.Common.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />

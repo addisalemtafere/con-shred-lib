@@ -1,10 +1,8 @@
 using Convex.Shared.Caching.Interfaces;
 using Convex.Shared.Caching.Services;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 
 namespace Convex.Shared.Caching.Extensions;
 
