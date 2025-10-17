@@ -18,7 +18,7 @@ public abstract class BaseValidator<T> : AbstractValidator<T>
         if (string.IsNullOrEmpty(email))
             return false;
 
-        return System.Text.RegularExpressions.Regex.IsMatch(email, 
+        return System.Text.RegularExpressions.Regex.IsMatch(email,
             @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 
@@ -32,7 +32,7 @@ public abstract class BaseValidator<T> : AbstractValidator<T>
         if (string.IsNullOrEmpty(phone))
             return false;
 
-        return System.Text.RegularExpressions.Regex.IsMatch(phone, 
+        return System.Text.RegularExpressions.Regex.IsMatch(phone,
             @"^\+?[1-9]\d{1,14}$");
     }
 
@@ -46,7 +46,7 @@ public abstract class BaseValidator<T> : AbstractValidator<T>
         if (string.IsNullOrEmpty(password) || password.Length < 8)
             return false;
 
-        return System.Text.RegularExpressions.Regex.IsMatch(password, 
+        return System.Text.RegularExpressions.Regex.IsMatch(password,
             @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]");
     }
 }

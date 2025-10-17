@@ -1,13 +1,12 @@
 using Convex.Shared.Security.Configuration;
 using Convex.Shared.Security.Interfaces;
 using Convex.Shared.Security.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Convex.Shared.Security.Extensions;
 
@@ -75,14 +74,14 @@ public static class ServiceCollectionExtensions
 
                 options.Events = new JwtBearerEvents
                 {
-                OnAuthenticationFailed = context =>
-                {
-                    if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                    OnAuthenticationFailed = context =>
                     {
-                        context.Response.Headers["Token-Expired"] = "true";
+                        if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                        {
+                            context.Response.Headers["Token-Expired"] = "true";
+                        }
+                        return Task.CompletedTask;
                     }
-                    return Task.CompletedTask;
-                }
                 };
             });
 

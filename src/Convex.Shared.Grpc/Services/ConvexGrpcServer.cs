@@ -1,7 +1,5 @@
-using Convex.Shared.Grpc.Interfaces;
 using Convex.Shared.Grpc.Configuration;
-using Convex.Shared.Grpc.Models;
-using Grpc.Core;
+using Convex.Shared.Grpc.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

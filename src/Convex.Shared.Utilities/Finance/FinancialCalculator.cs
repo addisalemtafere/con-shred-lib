@@ -67,7 +67,7 @@ public static class FinancialCalculator
     {
         var maxWin = CalculateMaxWin(stake, oddTotal, maxWinLimit);
         var winTax = CalculateWinTax(maxWin, taxableWinThreshold, winTaxRate);
-        
+
         return maxWin - winTax;
     }
 

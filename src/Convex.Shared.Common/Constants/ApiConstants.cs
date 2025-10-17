@@ -35,4 +35,3 @@ public static class ApiConstants
     /// </summary>
     public const int MaxRetryAttempts = 10;
 }
-

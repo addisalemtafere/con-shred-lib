@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace Convex.Shared.Models.ValueObjects;
@@ -9,7 +8,7 @@ namespace Convex.Shared.Models.ValueObjects;
 public readonly struct PhoneNumber
 {
     private static readonly Regex PhoneRegex = new(@"^(\+251|251)?0?((\d){8,9})$", RegexOptions.Compiled);
-    
+
     /// <summary>
     /// The phone number value
     /// </summary>
@@ -27,7 +26,7 @@ public readonly struct PhoneNumber
 
         // Normalize the phone number
         var normalized = NormalizePhoneNumber(phoneNumber);
-        
+
         if (!IsValidPhoneNumber(normalized))
             throw new ArgumentException($"Invalid phone number format: {phoneNumber}", nameof(phoneNumber));
 
@@ -41,21 +40,21 @@ public readonly struct PhoneNumber
     {
         // Remove all non-digit characters except +
         var cleaned = Regex.Replace(phoneNumber, @"[^\d+]", "");
-        
+
         // Handle different formats
         if (cleaned.StartsWith("+251"))
             return cleaned;
-        
+
         if (cleaned.StartsWith("251"))
             return "+" + cleaned;
-        
+
         if (cleaned.StartsWith("0"))
             return "+251" + cleaned.Substring(1);
-        
+
         // If it's just digits, assume it's Ethiopian format
         if (cleaned.Length >= 8 && cleaned.Length <= 9)
             return "+251" + cleaned;
-        
+
         return cleaned;
     }
 

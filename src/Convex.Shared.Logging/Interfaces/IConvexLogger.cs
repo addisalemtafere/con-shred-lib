@@ -1,4 +1,3 @@
-
 namespace Convex.Shared.Logging.Interfaces;
 
 /// <summary>

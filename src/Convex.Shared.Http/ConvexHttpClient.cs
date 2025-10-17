@@ -1,7 +1,7 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Text;
+using System.Text.Json;
 
 namespace Convex.Shared.Http;
 
@@ -141,7 +141,7 @@ public class ConvexHttpClient : IConvexHttpClient
         // Add Bearer token if configured
         if (!string.IsNullOrEmpty(_options.BearerToken))
         {
-            _httpClient.DefaultRequestHeaders.Authorization = 
+            _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _options.BearerToken);
         }
 
@@ -151,5 +151,4 @@ public class ConvexHttpClient : IConvexHttpClient
             _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
     }
-
 }

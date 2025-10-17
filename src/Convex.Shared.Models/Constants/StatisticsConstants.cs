@@ -9,12 +9,12 @@ public static class StatisticsConstants
     /// Red cards statistic
     /// </summary>
     public const string RedCards = "Red Cards";
-    
+
     /// <summary>
     /// Yellow cards statistic
     /// </summary>
     public const string YellowCards = "Yellow Cards";
-    
+
     /// <summary>
     /// Corner kicks statistic
     /// </summary>

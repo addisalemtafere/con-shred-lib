@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Convex.Shared.Models.ValueObjects;
 
 /// <summary>
@@ -59,7 +57,7 @@ public readonly struct Odds
     public static bool TryParse(string oddsString, out Odds odds)
     {
         odds = default;
-        
+
         if (string.IsNullOrWhiteSpace(oddsString))
             return false;
 
@@ -109,12 +107,12 @@ public readonly struct Odds
     {
         var numerator = Value - 1;
         var denominator = 1;
-        
+
         // Simplify the fraction
         var gcd = GreatestCommonDivisor((int)(numerator * 100), (int)(denominator * 100));
         numerator = (numerator * 100) / gcd;
         denominator = (denominator * 100) / gcd;
-        
+
         return $"{numerator}/{denominator}";
     }
 

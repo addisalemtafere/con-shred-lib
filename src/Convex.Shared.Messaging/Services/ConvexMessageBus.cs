@@ -1,7 +1,7 @@
-using Convex.Shared.Messaging.Interfaces;
-using Convex.Shared.Messaging.Configuration;
-using Microsoft.Extensions.Options;
 using Confluent.Kafka;
+using Convex.Shared.Messaging.Configuration;
+using Convex.Shared.Messaging.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Convex.Shared.Messaging.Services;
@@ -19,7 +19,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
     public ConvexMessageBus(IOptions<ConvexMessagingOptions> options)
     {
         _options = options.Value;
-        
+
         var producerConfig = new ProducerConfig
         {
             BootstrapServers = _options.BootstrapServers,
@@ -84,11 +84,11 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
             var fullTopic = $"{_options.TopicPrefix}.{topic}";
             var subscriptionId = Guid.NewGuid().ToString();
             var cancellationTokenSource = new CancellationTokenSource();
-            
+
             _subscriptions[subscriptionId] = cancellationTokenSource;
-            
+
             _consumer.Subscribe(fullTopic);
-            
+
             _ = Task.Run(async () =>
             {
                 try
@@ -111,7 +111,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
                     // Expected when cancellation is requested
                 }
             }, cancellationTokenSource.Token);
-            
+
             // Add a small delay to ensure subscription is set up
             return Task.Delay(100, cancellationTokenSource.Token)
                 .ContinueWith(_ => subscriptionId, TaskContinuationOptions.OnlyOnRanToCompletion);
@@ -130,7 +130,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
             {
                 cancellationTokenSource.Cancel();
                 _subscriptions.Remove(subscriptionId);
-                
+
                 // Add a small delay to ensure cleanup is complete
                 return Task.Delay(50)
                     .ContinueWith(_ => true, TaskContinuationOptions.OnlyOnRanToCompletion);
@@ -155,7 +155,6 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
         return SubscribeAsync(topic, handler).ContinueWith(t => !string.IsNullOrEmpty(t.Result));
     }
 
-
     public void Dispose()
     {
         foreach (var subscription in _subscriptions.Values)
@@ -163,7 +162,7 @@ public class ConvexMessageBus : IConvexMessageBus, IDisposable
             subscription.Cancel();
         }
         _subscriptions.Clear();
-        
+
         _producer?.Dispose();
         _consumer?.Dispose();
     }

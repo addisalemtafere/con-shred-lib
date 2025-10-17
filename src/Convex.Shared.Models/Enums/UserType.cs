@@ -9,27 +9,27 @@ public enum UserType
     /// Better user
     /// </summary>
     Better = 1,
-    
+
     /// <summary>
     /// Agent user
     /// </summary>
     Agent = 2,
-    
+
     /// <summary>
     /// Client user
     /// </summary>
     Client = 3,
-    
+
     /// <summary>
     /// Sales user
     /// </summary>
     Sales = 4,
-    
+
     /// <summary>
     /// Branch user
     /// </summary>
     Branch = 5,
-    
+
     /// <summary>
     /// Online agent user
     /// </summary>
@@ -45,7 +45,7 @@ public enum MemberType
     /// Regular member
     /// </summary>
     Regular = 1,
-    
+
     /// <summary>
     /// Agent member
     /// </summary>
@@ -61,7 +61,7 @@ public enum DepositPlan
     /// Pre-paid plan
     /// </summary>
     Prepaid = 1,
-    
+
     /// <summary>
     /// Post-paid plan
     /// </summary>
@@ -77,7 +77,7 @@ public enum Compatibility
     /// Legacy compatibility
     /// </summary>
     Legacy = 1,
-    
+
     /// <summary>
     /// Betradar compatibility
     /// </summary>

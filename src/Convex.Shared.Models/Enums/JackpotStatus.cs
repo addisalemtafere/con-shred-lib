@@ -9,17 +9,17 @@ public enum JackpotStatus
     /// Home jackpot
     /// </summary>
     Home = 1,
-    
+
     /// <summary>
     /// Draw jackpot
     /// </summary>
     Draw = 2,
-    
+
     /// <summary>
     /// Away jackpot
     /// </summary>
     Away = 3,
-    
+
     /// <summary>
     /// Pending jackpot
     /// </summary>
@@ -35,12 +35,12 @@ public enum JackpotWonStatus
     /// Won jackpot
     /// </summary>
     Won,
-    
+
     /// <summary>
     /// Loss jackpot
     /// </summary>
     Loss,
-    
+
     /// <summary>
     /// Pending jackpot
     /// </summary>
@@ -56,12 +56,12 @@ public enum JackpotChoice
     /// Home choice
     /// </summary>
     Home,
-    
+
     /// <summary>
     /// Draw choice
     /// </summary>
     Draw,
-    
+
     /// <summary>
     /// Away choice
     /// </summary>

@@ -22,17 +22,19 @@ public static class ApiRoutes
     {
         // Core business services
         public const string Auth = "/api/v1/auth";
+
         public const string Users = "/api/v1/users";
         public const string Betting = "/api/v1/betting";
         public const string Payments = "/api/v1/payments";
         public const string Games = "/api/v1/games";
         public const string Notifications = "/api/v1/notifications";
-        
+
         // Admin services
         public const string Admin = "/api/v1/admin";
-        
+
         // System services
         public const string Health = "/health";
+
         public const string Metrics = "/metrics";
     }
 
