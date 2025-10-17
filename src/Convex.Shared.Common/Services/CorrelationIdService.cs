@@ -58,9 +58,9 @@ public class CorrelationIdService : ICorrelationIdService
     {
         var previousCorrelationId = _correlationId.Value;
         var newCorrelationId = correlationId ?? GenerateCorrelationId();
-        
+
         _correlationId.Value = newCorrelationId;
-        
+
         return new CorrelationIdScope(previousCorrelationId);
     }
 

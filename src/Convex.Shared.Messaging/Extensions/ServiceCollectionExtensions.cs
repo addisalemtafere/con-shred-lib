@@ -2,7 +2,6 @@ using Convex.Shared.Messaging.Configuration;
 using Convex.Shared.Messaging.Interfaces;
 using Convex.Shared.Messaging.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Convex.Shared.Messaging.Extensions;
 

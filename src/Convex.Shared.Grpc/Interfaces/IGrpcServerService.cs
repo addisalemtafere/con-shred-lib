@@ -1,5 +1,3 @@
-using Grpc.Core;
-
 namespace Convex.Shared.Grpc.Interfaces;
 
 /// <summary>
@@ -11,12 +9,12 @@ public interface IGrpcServerService
     /// Service name for registration
     /// </summary>
     string ServiceName { get; }
-    
+
     /// <summary>
     /// Service port
     /// </summary>
     int Port { get; }
-    
+
     /// <summary>
     /// Service description
     /// </summary>

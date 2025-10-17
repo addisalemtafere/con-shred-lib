@@ -30,11 +30,11 @@ public static class ServiceCollectionExtensions
             .Enrich.WithProperty("Version", version)
             .Enrich.WithProperty("MachineName", Environment.MachineName)
             .Enrich.WithProperty("ProcessId", Environment.ProcessId)
-            .WriteTo.Console(outputTemplate: 
+            .WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {ServiceName} {Message:lj} {Properties:j}{NewLine}{Exception}")
-            .WriteTo.File("logs/convex-.txt", 
+            .WriteTo.File("logs/convex-.txt",
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: 
+                outputTemplate:
                 "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {ServiceName} {Message:lj} {Properties:j}{NewLine}{Exception}")
             .CreateLogger();
 
@@ -67,7 +67,7 @@ public static class ServiceCollectionExtensions
     {
         var loggerConfig = new LoggerConfiguration();
         configureLogger(loggerConfig);
-        
+
         Log.Logger = loggerConfig.CreateLogger();
 
         services.AddLogging(builder =>

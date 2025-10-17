@@ -9,22 +9,22 @@ public enum BettingStatus
     /// Open bet
     /// </summary>
     Open = 0,
-    
+
     /// <summary>
     /// Won bet
     /// </summary>
     Win = 1,
-    
+
     /// <summary>
     /// Lost bet
     /// </summary>
     Loss = 2,
-    
+
     /// <summary>
     /// Refunded bet
     /// </summary>
     Refund = 3,
-    
+
     /// <summary>
     /// Cancelled bet
     /// </summary>
@@ -40,17 +40,17 @@ public enum WinStatus
     /// Loss
     /// </summary>
     Loss = 2,
-    
+
     /// <summary>
     /// Win
     /// </summary>
     Win = 1,
-    
+
     /// <summary>
     /// Refund
     /// </summary>
     Refund = 3,
-    
+
     /// <summary>
     /// Pending
     /// </summary>
@@ -66,22 +66,22 @@ public enum MatchStatus
     /// Not started match
     /// </summary>
     NotStarted = 0,
-    
+
     /// <summary>
     /// Ended match
     /// </summary>
     Ended = 3,
-    
+
     /// <summary>
     /// Closed match
     /// </summary>
     Closed = 4,
-    
+
     /// <summary>
     /// Cancelled match
     /// </summary>
     Cancelled = 5,
-    
+
     /// <summary>
     /// Delayed match
     /// </summary>
@@ -97,17 +97,17 @@ public enum OddResult
     /// Win
     /// </summary>
     Win = 1,
-    
+
     /// <summary>
     /// Loss
     /// </summary>
     Loss = 0,
-    
+
     /// <summary>
     /// Open
     /// </summary>
     Open = -1,
-    
+
     /// <summary>
     /// Refund
     /// </summary>

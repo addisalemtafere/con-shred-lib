@@ -17,8 +17,7 @@ public static class ServiceCollectionExtensions
     {
         // Register correlation ID service as singleton
         services.AddSingleton<ICorrelationIdService, CorrelationIdService>();
-        
+
         return services;
     }
-
 }

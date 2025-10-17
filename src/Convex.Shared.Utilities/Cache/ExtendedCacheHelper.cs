@@ -1,4 +1,3 @@
-
 namespace Convex.Shared.Utilities.Cache;
 
 /// <summary>
@@ -10,12 +9,12 @@ public static class ExtendedCacheHelper
     /// Default cache key prefix
     /// </summary>
     public const string DefaultPrefix = "convex";
-    
+
     /// <summary>
     /// User cache key prefix
     /// </summary>
     private const string UserCachePrefix = "user:";
-    
+
     /// <summary>
     /// Session cache key prefix
     /// </summary>

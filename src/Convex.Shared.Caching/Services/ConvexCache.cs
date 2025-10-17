@@ -1,7 +1,7 @@
 using Convex.Shared.Caching.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
 using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace Convex.Shared.Caching.Services;
 
@@ -20,7 +20,7 @@ public class ConvexCache : IConvexCache
         _distributedCache = distributedCache;
         _semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         _pendingOperations = new ConcurrentDictionary<string, Task>();
-        
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -130,7 +130,7 @@ public class ConvexCache : IConvexCache
         const int batchSize = 100;
         var batches = keys.Chunk(batchSize);
         var tasks = batches.Select(batch => ProcessBatchAsync(batch.ToArray()));
-        
+
         var results = await Task.WhenAll(tasks);
         return results.Sum();
     }
@@ -160,7 +160,7 @@ public class ConvexCache : IConvexCache
         const int batchSize = 100;
         var batches = keys.Chunk(batchSize);
         var tasks = batches.Select(batch => GetBatchAsync<T>(batch.ToArray()));
-        
+
         var results = await Task.WhenAll(tasks);
         return results.SelectMany(dict => dict).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
@@ -186,7 +186,7 @@ public class ConvexCache : IConvexCache
         const int batchSize = 100;
         var batches = items.Chunk(batchSize);
         var tasks = batches.Select(batch => SetBatchAsync(batch.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), expiration));
-        
+
         var results = await Task.WhenAll(tasks);
         return results.Sum();
     }

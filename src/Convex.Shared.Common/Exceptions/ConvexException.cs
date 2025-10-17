@@ -187,8 +187,8 @@ public class RateLimitException : ConvexException
         DateTime resetTime,
         int retryAfter,
         string? correlationId = null)
-        : base("RATE_LIMIT", "Rate limit exceeded", "Too many requests. Please try again later.", 
-               new { Limit = limit, Remaining = remaining, ResetTime = resetTime, RetryAfter = retryAfter }, 
+        : base("RATE_LIMIT", "Rate limit exceeded", "Too many requests. Please try again later.",
+               new { Limit = limit, Remaining = remaining, ResetTime = resetTime, RetryAfter = retryAfter },
                null, correlationId)
     {
         Limit = limit;

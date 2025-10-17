@@ -12,17 +12,19 @@ public static class GrpcServiceEndpoints
     {
         // Core business services
         public const string Auth = "auth-service";
+
         public const string Users = "user-service";
         public const string Betting = "betting-service";
         public const string Payments = "payment-service";
         public const string Games = "game-service";
         public const string Notifications = "notification-service";
-        
+
         // Admin services
         public const string Admin = "admin-service";
-        
+
         // System services
         public const string Health = "health-service";
+
         public const string Metrics = "metrics-service";
     }
 

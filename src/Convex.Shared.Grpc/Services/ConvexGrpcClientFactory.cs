@@ -1,6 +1,5 @@
-using Convex.Shared.Grpc.Interfaces;
 using Convex.Shared.Grpc.Configuration;
-using Convex.Shared.Grpc.Models;
+using Convex.Shared.Grpc.Interfaces;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
@@ -54,7 +53,7 @@ public class ConvexGrpcClientFactory : IGrpcClientFactory, IDisposable
     private GrpcChannel GetOrCreateChannel(Uri endpoint)
     {
         var key = endpoint.ToString();
-        
+
         lock (_lock)
         {
             if (_channels.TryGetValue(key, out var existingChannel) && existingChannel.State != ConnectivityState.Shutdown)
@@ -71,7 +70,7 @@ public class ConvexGrpcClientFactory : IGrpcClientFactory, IDisposable
 
             var channel = GrpcChannel.ForAddress(endpoint, channelOptions);
             _channels[key] = channel;
-            
+
             _logger.LogInformation("Created gRPC channel for {Endpoint}", endpoint);
             return channel;
         }

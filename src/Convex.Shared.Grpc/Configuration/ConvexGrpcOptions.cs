@@ -69,6 +69,7 @@ public class ConvexGrpcOptions
     /// Server configuration
     /// </summary>
     public string? ServiceName { get; set; }
+
     public int ServerPort { get; set; } = 50051;
     public bool EnableServer { get; set; } = true;
 }

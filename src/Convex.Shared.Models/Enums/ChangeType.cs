@@ -9,7 +9,7 @@ public enum ChangeType
     /// Schedule change
     /// </summary>
     Schedule = 1,
-    
+
     /// <summary>
     /// Status change
     /// </summary>

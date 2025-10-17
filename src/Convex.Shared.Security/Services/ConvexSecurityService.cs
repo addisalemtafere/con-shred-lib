@@ -1,11 +1,11 @@
-using Convex.Shared.Security.Interfaces;
 using Convex.Shared.Security.Configuration;
+using Convex.Shared.Security.Interfaces;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Convex.Shared.Security.Services;
 
@@ -118,7 +118,7 @@ public class ConvexSecurityService : IConvexSecurityService
         var json = System.Text.Json.JsonSerializer.Serialize(keyData);
         var bytes = Encoding.UTF8.GetBytes(json);
         var base64 = Convert.ToBase64String(bytes);
-        
+
         return $"convex_{base64}";
     }
 

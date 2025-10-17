@@ -9,12 +9,12 @@ public enum PaymentStatus
     /// Pending payment
     /// </summary>
     Pending = 1,
-    
+
     /// <summary>
     /// Declined payment
     /// </summary>
     Declined = 2,
-    
+
     /// <summary>
     /// Successful payment
     /// </summary>
@@ -30,12 +30,12 @@ public enum PaymentType
     /// Regular payment
     /// </summary>
     RegularPay = 1,
-    
+
     /// <summary>
     /// Cashback payment
     /// </summary>
     Cashback = 2,
-    
+
     /// <summary>
     /// Cashout payment
     /// </summary>
@@ -51,27 +51,27 @@ public enum Channel
     /// Web channel
     /// </summary>
     Web,
-    
+
     /// <summary>
     /// Desktop channel
     /// </summary>
     Desktop,
-    
+
     /// <summary>
     /// Mobile channel
     /// </summary>
     Mobile,
-    
+
     /// <summary>
     /// Telegram bot channel
     /// </summary>
     TelegramBot,
-    
+
     /// <summary>
     /// SMS channel
     /// </summary>
     Sms,
-    
+
     /// <summary>
     /// Agent channel
     /// </summary>
@@ -87,12 +87,12 @@ public enum ActivityType
     /// Deposit activity
     /// </summary>
     Deposit,
-    
+
     /// <summary>
     /// Withdrawal activity
     /// </summary>
     Withdrawal,
-    
+
     /// <summary>
     /// Sport bet activity
     /// </summary>

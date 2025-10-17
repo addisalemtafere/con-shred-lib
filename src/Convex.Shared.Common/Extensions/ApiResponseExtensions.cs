@@ -1,5 +1,4 @@
 using Convex.Shared.Common.Models;
-using Convex.Shared.Common.Constants;
 
 namespace Convex.Shared.Common.Extensions;
 
@@ -88,12 +87,12 @@ public static class ApiResponseExtensions
     /// Create a paginated API response
     /// </summary>
     public static PaginatedResponse<T> Paginated<T>(
-        IEnumerable<T> data, 
-        int page, 
-        int pageSize, 
-        long totalCount, 
-        string? message = null, 
-        string? correlationId = null, 
+        IEnumerable<T> data,
+        int page,
+        int pageSize,
+        long totalCount,
+        string? message = null,
+        string? correlationId = null,
         string? requestId = null)
     {
         var response = new PaginatedResponse<T>(data, page, pageSize, totalCount)
