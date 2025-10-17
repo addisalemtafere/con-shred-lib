@@ -70,7 +70,14 @@ public class ConvexGrpcOptions
     /// </summary>
     public string? ServiceName { get; set; }
 
+    /// <summary>
+    /// Server port number for gRPC services
+    /// </summary>
     public int ServerPort { get; set; } = 50051;
+    
+    /// <summary>
+    /// Enable or disable the gRPC server
+    /// </summary>
     public bool EnableServer { get; set; } = true;
 }
 
