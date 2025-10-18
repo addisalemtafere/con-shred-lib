@@ -1,0 +1,36 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Convex.Shared.Common.Models
+{
+    public class PaginatedResponse<T> : ApiResponse<PaginatedData<T>>
+    {
+        private PaginatedResponse(List<T> items, int pageNum, int pageSize, int totalCount)
+            : base()
+        {
+            Data = new PaginatedData<T>
+            {
+                Items = items,
+                PageNum = pageNum,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+            Success = true;
+        }
+
+        public static async Task<PaginatedResponse<T>> CreateAsync(IQueryable<T> query, int pageNum, int pageSize, CancellationToken cancellationToken)
+        {
+            if (pageNum == 0) pageNum = 1;
+            if (pageSize == 0) pageSize = await query.CountAsync(cancellationToken);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var items = await query
+                .Skip((pageNum - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PaginatedResponse<T>(items, pageNum, pageSize, totalCount);
+        }
+    }
+
+   
+}

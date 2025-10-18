@@ -1,32 +1,20 @@
-namespace Convex.Shared.Common.Constants;
 
-/// <summary>
-/// Cache key constants
-/// </summary>
-public static class CacheConstants
+﻿namespace Convex.Shared.Common.Constants
 {
     /// <summary>
-    /// Default cache expiration in minutes
+    /// Cache key constants
     /// </summary>
-    public const int DefaultExpirationMinutes = 15;
+    public static class CacheConstants
+    {
+        public const int DefaultExpirationMinutes = 15;
 
-    /// <summary>
-    /// Short cache expiration in minutes
-    /// </summary>
-    public const int ShortExpirationMinutes = 5;
+        public const int ShortExpirationMinutes = 5;
 
-    /// <summary>
-    /// Long cache expiration in minutes
-    /// </summary>
-    public const int LongExpirationMinutes = 60;
+        public const int LongExpirationMinutes = 60;
 
-    /// <summary>
-    /// User cache key prefix
-    /// </summary>
-    public const string UserCachePrefix = "user:";
+        public const string UserCachePrefix = "user:";
 
-    /// <summary>
-    /// Session cache key prefix
-    /// </summary>
-    public const string SessionCachePrefix = "session:";
+        public const string SessionCachePrefix = "session:";
+    }
+
 }

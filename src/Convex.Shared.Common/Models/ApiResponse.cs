@@ -9,95 +9,110 @@ namespace Convex.Shared.Common.Models;
 public class ApiResponse<T>
 {
     [JsonPropertyName("success")]
-    public bool Success { get; set; } = true;
+    public bool Success { get; set; }
 
     [JsonPropertyName("data")]
     public T? Data { get; set; }
 
-    [JsonPropertyName("message")]
-    public string? Message { get; set; }
+    [JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; set; }
+
+    [JsonPropertyName("errorMessage")]
+    public string? ErrorMessage { get; set; }
+
+    [JsonPropertyName("errors")]
+    public Dictionary<string, string>? Errors { get; set; }
 
     [JsonPropertyName("metadata")]
-    public ResponseMetadata? Metadata { get; set; }
-}
+    public ResponseMetadata Metadata { get; set; } = new();
 
-/// <summary>
-/// API response metadata
-/// </summary>
-public class ResponseMetadata
-{
-    [JsonPropertyName("timestamp")]
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    [JsonPropertyName("requestId")]
-    public string? RequestId { get; set; }
-
-    [JsonPropertyName("version")]
-    public string? Version { get; set; }
-
-    [JsonPropertyName("correlationId")]
-    public string? CorrelationId { get; set; }
-
-    [JsonPropertyName("pagination")]
-    public PaginationMetadata? Pagination { get; set; }
-}
-
-/// <summary>
-/// Pagination metadata for paginated responses
-/// </summary>
-public class PaginationMetadata
-{
-    [JsonPropertyName("page")]
-    public int Page { get; set; }
-
-    [JsonPropertyName("pageSize")]
-    public int PageSize { get; set; }
-
-    [JsonPropertyName("totalPages")]
-    public int TotalPages { get; set; }
-
-    [JsonPropertyName("totalCount")]
-    public long TotalCount { get; set; }
-
-    [JsonPropertyName("hasNext")]
-    public bool HasNext { get; set; }
-
-    [JsonPropertyName("hasPrevious")]
-    public bool HasPrevious { get; set; }
-
-    [JsonPropertyName("nextPageUrl")]
-    public string? NextPageUrl { get; set; }
-
-    [JsonPropertyName("previousPageUrl")]
-    public string? PreviousPageUrl { get; set; }
-}
-
-/// <summary>
-/// Paginated response wrapper
-/// </summary>
-/// <typeparam name="T">The data type</typeparam>
-public class PaginatedResponse<T> : ApiResponse<IEnumerable<T>>
-{
-    public PaginatedResponse()
+    // Convert from Result<T> to ApiResponse<T>
+    public static ApiResponse<T> FromResult(Result<T> result)
     {
-        Metadata = new ResponseMetadata();
+        if (result.IsSuccess)
+        {
+            return new ApiResponse<T>
+            {
+                Success = true,
+                Data = result.Value
+            };
+        }
+
+        var response = new ApiResponse<T>
+        {
+            Success = false,
+            ErrorCode = result.Errors.FirstOrDefault()?.Code,
+            ErrorMessage = result.Errors.FirstOrDefault()?.Message
+        };
+
+        // Handle multiple errors
+        if (result.Errors.Length > 1)
+        {
+            response.Errors = result.Errors.ToDictionary(
+                e => e.Code,
+                e => e.Message
+            );
+        }
+
+        return response;
     }
 
-    public PaginatedResponse(IEnumerable<T> data, int page, int pageSize, long totalCount)
+    // Convert from Result (non-generic) to ApiResponse<object>
+    public static ApiResponse<object> FromResult(Result result)
     {
-        Success = true;
-        Data = data;
-        Metadata = new ResponseMetadata
+        if (result.IsSuccess)
         {
-            Pagination = new PaginationMetadata
+            return new ApiResponse<object>
             {
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-                HasNext = page < (int)Math.Ceiling((double)totalCount / pageSize),
-                HasPrevious = page > 1
-            }
+                Success = true,
+                Data = null
+            };
+        }
+
+        var response = new ApiResponse<object>
+        {
+            Success = false,
+            ErrorCode = result.Errors.FirstOrDefault()?.Code,
+            ErrorMessage = result.Errors.FirstOrDefault()?.Message
+        };
+
+        if (result.Errors.Length > 1)
+        {
+            response.Errors = result.Errors.ToDictionary(
+                e => e.Code,
+                e => e.Message
+            );
+        }
+
+        return response;
+    }
+
+    // Keep your existing factory methods for backward compatibility
+    public static ApiResponse<T> SuccessResult(T data)
+    {
+        return new ApiResponse<T>
+        {
+            Success = true,
+            Data = data
+        };
+    }
+
+    public static ApiResponse<T> ErrorResult(string errorMessage)
+    {
+        return new ApiResponse<T>
+        {
+            Success = false,
+            ErrorMessage = errorMessage
+        };
+    }
+
+    public static ApiResponse<T> ErrorResult(string errorCode, string errorMessage)
+    {
+        return new ApiResponse<T>
+        {
+            Success = false,
+            ErrorCode = errorCode,
+            ErrorMessage = errorMessage
         };
     }
 }

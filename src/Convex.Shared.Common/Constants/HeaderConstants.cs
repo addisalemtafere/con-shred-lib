@@ -1,32 +1,20 @@
-namespace Convex.Shared.Common.Constants;
 
-/// <summary>
-/// HTTP header constants
-/// </summary>
-public static class HeaderConstants
+﻿namespace Convex.Shared.Common.Constants
 {
     /// <summary>
-    /// Correlation ID header name
+    /// HTTP header constants
     /// </summary>
-    public const string CorrelationId = "X-Correlation-ID";
+    public static class HeaderConstants
+    {
+        public const string CorrelationId = "X-Correlation-ID";
 
-    /// <summary>
-    /// Request ID header name
-    /// </summary>
-    public const string RequestId = "X-Request-ID";
+        public const string RequestId = "X-Request-ID";
 
-    /// <summary>
-    /// API key header name
-    /// </summary>
-    public const string ApiKey = "X-API-Key";
+        public const string ApiKey = "X-API-Key";
 
-    /// <summary>
-    /// User ID header name
-    /// </summary>
-    public const string UserId = "X-User-ID";
+        public const string UserId = "X-User-ID";
 
-    /// <summary>
-    /// Tenant ID header name
-    /// </summary>
-    public const string TenantId = "X-Tenant-ID";
+        public const string TenantId = "X-Tenant-ID";
+    }
+
 }

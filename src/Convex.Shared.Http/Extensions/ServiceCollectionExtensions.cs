@@ -1,106 +1,62 @@
-using Microsoft.Extensions.Configuration;
+﻿using Convex.Shared.Http.Logging;
+using Convex.Shared.Http.Logging.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Convex.Shared.Http.Extensions;
-
-/// <summary>
-/// Extension methods for configuring Convex HTTP client
-/// </summary>
-public static class ServiceCollectionExtensions
+namespace Convex.Shared.Http.Extensions
 {
-    /// <summary>
-    /// Adds Convex HTTP client with default configuration
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="configureOptions">Optional configuration action</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddConvexHttpClient(
-        this IServiceCollection services,
-        Action<ConvexHttpClientOptions>? configureOptions = null)
+    public static class ServiceCollectionExtensions
     {
-        // Configure options
-        if (configureOptions != null)
+        /// <summary>
+        /// Configures the database where HttpClient's configured to log will save data.
+        /// </summary>
+        /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection to add services to.</param>
+        /// <param name="loggingConnectionString">PostgreSQL connection string of logging database.  If this is null then .AddDbContext()
+        /// will be used and rely on the <see cref="IConnectionStringProvider"/> implementation.</param>
+        public static IServiceCollection ConfigureHttpClientLogging(this IServiceCollection services, string loggingConnectionString,
+            Func<IServiceProvider, int?> participantIdAccessor = null, Func<IServiceProvider, Guid?> applicationKeyAccessor = null)
         {
-            services.Configure(configureOptions);
+            if (!services.Any(x => x.ServiceType == typeof(LoggingDbContext)))
+                services.AddDbContext<LoggingDbContext>(opts => opts.UseNpgsql(loggingConnectionString)); // Changed to UseNpgsql
+
+            var dataAccessor = new LogDataAccessor
+            {
+                GetParticipantId = participantIdAccessor,
+                GetApplicationKey = applicationKeyAccessor
+            };
+
+            services.TryAddSingleton(dataAccessor);
+            services.TryAddTransient<HttpLoggingHandler>();
+            services.TryAddScoped<Logging.IHttpClientLogger, HttpClientLogger>();
+            services.AddHttpClient();
+            return services;
         }
 
-        // Register the HTTP client
-        services.AddHttpClient<IConvexHttpClient, ConvexHttpClient>();
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds Convex HTTP client with specific base address
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="baseAddress">The base address for the HTTP client</param>
-    /// <param name="apiKey">Optional API key</param>
-    /// <param name="timeout">Optional timeout (default: 30 seconds)</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddConvexHttpClient(
-        this IServiceCollection services,
-        string baseAddress,
-        string? apiKey = null,
-        TimeSpan? timeout = null)
-    {
-        services.Configure<ConvexHttpClientOptions>(options =>
+        /// <summary>
+        /// Binds an <see cref="HttpClient"/> configured for logging to the type <typeparamref name="TClient"/>.
+        /// </summary>
+        /// <typeparam name="TClient">The type of the service that will be configured to be injected with a logging <see cref="HttpClient"/>.</typeparam>
+        /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection to add services to.</param>
+        public static IHttpClientBuilder AddLoggingHttpClient<TClient>(this IServiceCollection services)
+            where TClient : class
         {
-            options.BaseAddress = new Uri(baseAddress);
-            options.ApiKey = apiKey;
-            options.Timeout = timeout ?? TimeSpan.FromSeconds(30);
-        });
+            return services.AddHttpClient<TClient>()
+                .AddHttpMessageHandler<HttpLoggingHandler>();
+        }
 
-        services.AddHttpClient<IConvexHttpClient, ConvexHttpClient>();
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds Convex HTTP client for service-to-service communication
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="serviceName">The name of the service</param>
-    /// <param name="baseAddress">The base address for the service</param>
-    /// <param name="apiKey">Optional API key</param>
-    /// <param name="timeout">Optional timeout (default: 30 seconds)</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddConvexServiceClient(
-        this IServiceCollection services,
-        string serviceName,
-        string baseAddress,
-        string? apiKey = null,
-        TimeSpan? timeout = null)
-    {
-        services.AddHttpClient(serviceName, client =>
+        /// <summary>
+        /// Binds an <see cref="HttpClient"/> configured for logging to the type <typeparamref name="TClient"/>.
+        /// </summary>
+        /// <typeparam name="TClient">The declared type of the service that will be configured to be injected with a logging <see cref="HttpClient"/>.</typeparam>
+        /// <typeparam name="TImplementation">The implementation type of the service that will be configured to be injected with a logging <see cref="HttpClient"/>.</typeparam>
+        /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection to add services to.</param>
+        public static IHttpClientBuilder AddLoggingHttpClient<TClient, TImplementation>(this IServiceCollection services)
+            where TClient : class
+            where TImplementation : class, TClient
         {
-            client.BaseAddress = new Uri(baseAddress);
-            client.Timeout = timeout ?? TimeSpan.FromSeconds(30);
-
-            if (!string.IsNullOrEmpty(apiKey))
-            {
-                client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-            }
-        });
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds Convex HTTP client with configuration from appsettings.json
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="configuration">The configuration</param>
-    /// <param name="sectionName">The configuration section name (default: "ConvexHttpClient")</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddConvexHttpClient(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string sectionName = "ConvexHttpClient")
-    {
-        services.Configure<ConvexHttpClientOptions>(configuration.GetSection(sectionName));
-        services.AddHttpClient<IConvexHttpClient, ConvexHttpClient>();
-
-        return services;
+            return services.AddHttpClient<TClient, TImplementation>()
+                .AddHttpMessageHandler<HttpLoggingHandler>();
+        }
     }
 }
