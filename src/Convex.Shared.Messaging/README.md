@@ -1,247 +1,114 @@
-# Convex.Shared.Messaging
+﻿📨 Convex.Shared.Messaging
 
-Messaging utilities for Convex microservices using Apache Kafka.
+A shared .NET library for easily integrating Kafka messaging (producers, consumers, and serializers) into Convex-based services.
 
-## Features
+This package provides ready-to-use dependency injection extensions for Kafka setup, configuration binding, and strongly-typed producers/consumers.
 
-- **Kafka Integration**: Full Apache Kafka support
-- **Topic Publishing**: Publish messages to Kafka topics
-- **Consumer Groups**: Kafka consumer group support
-- **Automatic Recovery**: Built-in connection recovery
-- **JSON Serialization**: Automatic message serialization
-- **Error Handling**: Robust error handling and retry logic
+📦 Installation
 
-## Installation
+Add the NuGet package reference (once you publish or share it):
 
-```xml
-<PackageReference Include="Convex.Shared.Messaging" Version="1.0.0" />
-```
+dotnet add package Convex.Shared.Messaging
 
-## Quick Start
 
-### 1. Register Services
+⚙️ If you’re referencing it locally in your solution, add a Project Reference instead:
 
-```csharp
-// In Program.cs
-services.AddConvexMessaging(options =>
+dotnet add <YourProjectName> reference ../Convex.Shared.Messaging/Convex.Shared.Messaging.csproj
+
+⚙️ Prerequisites
+
+Make sure your project references these common dependencies (most are already included transitively):
+
+dotnet add package Microsoft.Extensions.Options.ConfigurationExtensions
+dotnet add package Microsoft.Extensions.DependencyInjection.Abstractions
+dotnet add package Microsoft.Extensions.Configuration.Abstractions
+
+🧩 Configuration
+
+Add a Kafka section in your appsettings.json (or environment variables):
+
 {
-    options.BootstrapServers = "localhost:9092";
-    options.SecurityProtocol = "PLAINTEXT";
-    options.ConsumerGroup = "convex-group";
-});
-```
-
-### 2. Use in Your Service
-
-```csharp
-public class UserService
-{
-    private readonly IConvexMessageBus _messageBus;
-
-    public UserService(IConvexMessageBus messageBus)
-    {
-        _messageBus = messageBus;
-    }
-
-    public async Task<User> CreateUserAsync(User user)
-    {
-        // Create user in database
-        var createdUser = await _userRepository.CreateAsync(user);
-        
-        // Publish user created event
-        await _messageBus.PublishAsync("user.created", new UserCreatedEvent
-        {
-            UserId = createdUser.Id,
-            Email = createdUser.Email,
-            CreatedAt = DateTime.UtcNow
-        });
-        
-        return createdUser;
-    }
-}
-```
-
-## Topic Publishing
-
-### Publish Messages
-```csharp
-// Publish to topic
-await _messageBus.PublishAsync("user.created", new UserCreatedEvent
-{
-    UserId = 123,
-    Email = "user@example.com",
-    CreatedAt = DateTime.UtcNow
-});
-
-// Publish to multiple topics
-await _messageBus.PublishAsync("bet.placed", new BetPlacedEvent
-{
-    BetId = 456,
-    UserId = 123,
-    Amount = 100.00,
-    Odds = 2.5
-});
-```
-
-### Subscribe to Topics
-```csharp
-// Subscribe to topic
-var subscriptionId = await _messageBus.SubscribeAsync<UserCreatedEvent>(
-    "user.created", 
-    async (message) =>
-    {
-        Console.WriteLine($"User {message.UserId} created with email {message.Email}");
-        // Handle user created event
-    });
-
-// Unsubscribe
-await _messageBus.UnsubscribeAsync(subscriptionId);
-```
-
-## Queue Management
-
-### Send Messages
-```csharp
-// Send to queue
-await _messageBus.SendAsync("user.notifications", new NotificationMessage
-{
-    UserId = 123,
-    Type = "Welcome",
-    Content = "Welcome to Convex!"
-});
-```
-
-### Receive Messages
-```csharp
-// Receive from queue
-await _messageBus.ReceiveAsync<NotificationMessage>(
-    "user.notifications",
-    async (message) =>
-    {
-        await _notificationService.SendAsync(message);
-    });
-```
-
-## Message Types
-
-### Event Messages
-```csharp
-public class UserCreatedEvent
-{
-    public int UserId { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-}
-
-public class BetPlacedEvent
-{
-    public int BetId { get; set; }
-    public int UserId { get; set; }
-    public decimal Amount { get; set; }
-    public decimal Odds { get; set; }
-    public DateTime PlacedAt { get; set; }
-}
-```
-
-### Command Messages
-```csharp
-public class SendEmailCommand
-{
-    public string To { get; set; } = string.Empty;
-    public string Subject { get; set; } = string.Empty;
-    public string Body { get; set; } = string.Empty;
-}
-
-public class ProcessPaymentCommand
-{
-    public int UserId { get; set; }
-    public decimal Amount { get; set; }
-    public string Currency { get; set; } = "USD";
-}
-```
-
-## Configuration
-
-### appsettings.json
-```json
-{
-  "ConvexMessaging": {
+  "Kafka": {
     "BootstrapServers": "localhost:9092",
-    "SecurityProtocol": "PLAINTEXT",
-    "SaslMechanism": "PLAIN",
-    "SaslUsername": "",
-    "SaslPassword": "",
-    "SslCaLocation": "",
-    "TopicPrefix": "convex",
-    "ConsumerGroup": "convex-group",
-    "AutoOffsetReset": "earliest",
-    "EnableAutoCommit": true,
-    "AutoCommitIntervalMs": 5000,
-    "SessionTimeoutMs": 30000,
-    "RequestTimeoutMs": 30000,
-    "MaxRetryAttempts": 3,
-    "RetryDelaySeconds": 5,
-    "MessageRetentionMs": 604800000
+    "GroupId": "convex-app",
+    "EnableAutoCommit": false,
+    "AutoOffsetReset": "Earliest",
+    "MessageTimeoutMs": 5000,
+    "RequestTimeoutMs": 3000,
+    "SessionTimeoutMs": 10000,
+    "Producer": {
+      "Acks": "all"
+    },
+    "Consumer": {
+      "EnableAutoCommit": false
+    }
   }
 }
-```
 
-### Environment Variables
-```bash
-export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-export KAFKA_SECURITY_PROTOCOL=PLAINTEXT
-export KAFKA_CONSUMER_GROUP=convex-group
-export KAFKA_TOPIC_PREFIX=convex
-```
+🚀 Usage in a Consumer Project
+1️⃣ Register Services in Program.cs
+using Convex.Shared.Messaging.Extensions;
 
-## Error Handling
+var builder = WebApplication.CreateBuilder(args);
 
-### Retry Logic
-```csharp
-public async Task<bool> PublishWithRetryAsync<T>(string topic, T message)
+// Add Kafka messaging services
+builder.Services.AddKafkaMessaging(builder.Configuration);
+
+var app = builder.Build();
+app.Run();
+
+
+That’s all you need — the library automatically:
+
+Binds configuration from the "Kafka" section to KafkaConfig
+
+Registers generic Kafka producers/consumers:
+
+IKafkaProducer<T>
+
+IKafkaProducer<TKey, TValue>
+
+IKafkaConsumer<T>
+
+IKafkaConsumer<TKey, TValue>
+
+2️⃣ Inject and Use Producers / Consumers
+
+Example: Producing messages
+
+public class UserCreatedProducer
 {
-    for (int attempt = 1; attempt <= 3; attempt++)
+    private readonly IKafkaProducer<string, UserCreatedEvent> _producer;
+
+    public UserCreatedProducer(IKafkaProducer<string, UserCreatedEvent> producer)
     {
-        try
-        {
-            return await _messageBus.PublishAsync(topic, message);
-        }
-        catch (Exception ex)
-        {
-            if (attempt == 3)
-                throw;
-                
-            await Task.Delay(TimeSpan.FromSeconds(attempt * 2));
-        }
+        _producer = producer;
     }
-    return false;
+
+    public async Task PublishAsync(UserCreatedEvent evt)
+    {
+        await _producer.ProduceAsync("user-created-topic", "user-key", evt);
+    }
 }
-```
 
-### Dead Letter Topic
-```csharp
-// Configure dead letter topic for failed messages
-var deadLetterTopic = "convex.dlq";
 
-// Publish failed messages to dead letter topic
-await _messageBus.PublishAsync(deadLetterTopic, new DeadLetterMessage
+Example: Consuming messages
+
+public class UserCreatedConsumer : IKafkaConsumer<string, UserCreatedEvent>
 {
-    OriginalTopic = originalTopic,
-    OriginalMessage = originalMessage,
-    ErrorMessage = ex.Message,
-    FailedAt = DateTime.UtcNow
-});
-```
+    public Task ConsumeAsync(string key, UserCreatedEvent message, CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Received event for user {message.UserId}");
+        return Task.CompletedTask;
+    }
+}
 
-## Best Practices
+🧠 Advanced: Custom Message Serializer
 
-1. **Use Topics for Events**: Use Kafka topics for event-driven communication
-2. **Consumer Groups**: Use consumer groups for load balancing
-3. **Handle Errors**: Implement proper error handling and retry logic
-4. **Monitor Messages**: Monitor message flow and performance
-5. **Use Dead Letter Topics**: Handle failed messages appropriately
-6. **Partitioning**: Consider message partitioning for scalability
+You can register a custom serializer per type:
 
-## License
+builder.Services.AddMessageSerializer<MyCustomMessage>(sp =>
+    new JsonMessageSerializer<MyCustomMessage>());
 
-This project is licensed under the MIT License.
+
+Then your Kafka producer/consumer will automatically use it.

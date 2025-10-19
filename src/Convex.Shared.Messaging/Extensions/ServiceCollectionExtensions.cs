@@ -1,35 +1,60 @@
 using Convex.Shared.Messaging.Configuration;
-using Convex.Shared.Messaging.Interfaces;
-using Convex.Shared.Messaging.Services;
+using Convex.Shared.Messaging.Consumers;
+using Convex.Shared.Messaging.Producers;
+using Convex.Shared.Messaging.Serialization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Convex.Shared.Messaging.Extensions;
 
-/// <summary>
-/// Extension methods for configuring Convex messaging services
-/// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds Convex messaging services
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="configureOptions">Optional configuration action</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddConvexMessaging(
-        this IServiceCollection services,
-        Action<ConvexMessagingOptions>? configureOptions = null)
+    public static IServiceCollection AddKafkaMessaging(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure options
-        if (configureOptions != null)
-        {
-            services.Configure(configureOptions);
-        }
+        // Correct way to configure options with IConfiguration
+        services.Configure<KafkaConfig>(configuration.GetSection("Kafka"));
 
-        // Register services
-        services.AddSingleton<IConvexMessageBus, ConvexMessageBus>();
+        // Register generic producers and consumers
+        services.AddTransient(typeof(IKafkaProducer<>), typeof(KafkaProducer<>));
+        services.AddTransient(typeof(IKafkaProducer<,>), typeof(KafkaProducer<,>));
+        services.AddTransient(typeof(IKafkaConsumer<>), typeof(KafkaConsumer<>));
+        services.AddTransient(typeof(IKafkaConsumer<,>), typeof(KafkaConsumer<,>));
 
+        return services;
+    }
+
+    public static IServiceCollection AddKafkaProducer<TValue>(this IServiceCollection services)
+        where TValue : class
+    {
+        services.AddTransient<IKafkaProducer<TValue>, KafkaProducer<TValue>>();
+        return services;
+    }
+
+    public static IServiceCollection AddKafkaProducer<TKey, TValue>(this IServiceCollection services)
+        where TValue : class
+    {
+        services.AddTransient<IKafkaProducer<TKey, TValue>, KafkaProducer<TKey, TValue>>();
+        return services;
+    }
+
+    public static IServiceCollection AddKafkaConsumer<TValue>(this IServiceCollection services)
+        where TValue : class
+    {
+        services.AddTransient<IKafkaConsumer<TValue>, KafkaConsumer<TValue>>();
+        return services;
+    }
+
+    public static IServiceCollection AddKafkaConsumer<TKey, TValue>(this IServiceCollection services)
+        where TValue : class
+    {
+        services.AddTransient<IKafkaConsumer<TKey, TValue>, KafkaConsumer<TKey, TValue>>();
+        return services;
+    }
+
+    public static IServiceCollection AddMessageSerializer<T>(this IServiceCollection services,
+        Func<IServiceProvider, IMessageSerializer<T>> implementationFactory)
+    {
+        services.AddTransient(implementationFactory);
         return services;
     }
 }

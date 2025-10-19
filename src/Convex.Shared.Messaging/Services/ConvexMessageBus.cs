@@ -3,6 +3,8 @@ using Convex.Shared.Messaging.Configuration;
 using Microsoft.Extensions.Options;
 using Confluent.Kafka;
 using System.Text.Json;
+using ProducerConfig = Confluent.Kafka.ProducerConfig;
+using ConsumerConfig = Confluent.Kafka.ConsumerConfig;
 
 namespace Convex.Shared.Messaging.Services;
 
