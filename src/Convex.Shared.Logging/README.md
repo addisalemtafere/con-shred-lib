@@ -11,6 +11,9 @@ Structured logging utilities for Convex microservices.
 - **Correlation IDs**: Request correlation tracking
 - **Multiple Sinks**: Console and file logging
 - **Enrichment**: Automatic property enrichment
+- **High-Performance**: Optimized for billion-record scenarios
+- **Object Pooling**: Memory-efficient object reuse
+- **Parallel Processing**: Optimized batch logging
 
 ## Installation
 
@@ -134,6 +137,21 @@ public async Task ProcessRequestAsync(string correlationId, RequestData data)
 }
 ```
 
+### High-Performance Batch Logging
+
+```csharp
+// Standard batch logging
+var messages = new (string message, object[] properties)[]
+{
+    ("User created", new object[] { "UserId", 123 }),
+    ("Order placed", new object[] { "OrderId", 456, "Amount", 99.99m })
+};
+_logger.LogBatch(messages);
+
+// Ultra-high-performance batch logging with object pooling
+_logger.LogBatchOptimized(messages);
+```
+
 ## Configuration
 
 ### Basic Configuration
@@ -216,6 +234,23 @@ services.AddConvexLogging(config =>
 }
 ```
 
+## Performance Optimizations
+
+### Object Pooling
+- **Memory Efficient**: Reuses object arrays to reduce GC pressure
+- **High Volume**: Optimized for billion-record scenarios
+- **Automatic Management**: Buffers are automatically returned to pool
+
+### Parallel Processing
+- **Batch Logging**: Parallel processing for large batches (>100 messages)
+- **Ultra-High Performance**: Optimized batch logging for very large batches (>1000 messages)
+- **Smart Thresholds**: Uses sequential processing for small batches to avoid overhead
+
+### Memory Management
+- **Pre-allocated Arrays**: Avoids dynamic List growth
+- **Efficient Copying**: Uses Array.Copy for better performance
+- **Reduced Allocations**: Eliminates anonymous object creation
+
 ## Best Practices
 
 1. **Use Structured Logging**: Always use structured logging with properties
@@ -224,6 +259,8 @@ services.AddConvexLogging(config =>
 4. **Use Correlation IDs**: Track requests across services
 5. **Log Errors Properly**: Always include exception details
 6. **Use Appropriate Levels**: Use the correct log level for each message
+7. **Use Batch Logging**: For high-volume scenarios, use LogBatch or LogBatchOptimized
+8. **Return Buffers**: When using object pooling, return buffers to pool
 
 ## License
 

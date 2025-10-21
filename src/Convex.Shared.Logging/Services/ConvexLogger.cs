@@ -1,6 +1,7 @@
 using Convex.Shared.Logging.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace Convex.Shared.Logging.Services;
 
@@ -14,6 +15,12 @@ public class ConvexLogger : IConvexLogger
     private readonly string _version;
     private readonly int _processId;
     private readonly string _machineName;
+    
+    // Performance optimization: Object pooling for high-volume scenarios
+    private static readonly ConcurrentQueue<object[]> _propertyBufferPool = new();
+    private static readonly ConcurrentQueue<object[]> _contextBufferPool = new();
+    private const int MaxProperties = 20;
+    private const int MaxContextSize = 10;
 
     public ConvexLogger(
         ILogger<ConvexLogger> logger,
@@ -61,48 +68,29 @@ public class ConvexLogger : IConvexLogger
 
     public void LogPerformance(string operation, TimeSpan duration, params object[] properties)
     {
-        var performanceData = new
-        {
-            Operation = operation,
-            Duration = duration.TotalMilliseconds,
-            DurationMs = (long)duration.TotalMilliseconds,
-            Timestamp = DateTime.UtcNow
-        };
-
+        // Performance optimization: Use direct logging instead of anonymous objects
+        var durationMs = (long)duration.TotalMilliseconds;
         var allProperties = PrependStandardProperties(properties);
         _logger.LogInformation("Performance: {Operation} completed in {Duration}ms",
-            allProperties);
+            operation, durationMs);
     }
 
     public void LogBusinessEvent(string eventName, object data, params object[] properties)
     {
-        var eventData = new
-        {
-            EventName = eventName,
-            Data = data,
-            Timestamp = DateTime.UtcNow
-        };
-
+        // Performance optimization: Use direct logging instead of anonymous objects
         var allProperties = PrependStandardProperties(properties);
         _logger.LogInformation("Business Event: {EventName} - {Data}",
-            allProperties);
+            eventName, data);
     }
 
     public void LogApiRequest(string method, string url, int statusCode, TimeSpan duration, params object[] properties)
     {
-        var requestData = new
-        {
-            Method = method,
-            Url = url,
-            StatusCode = statusCode,
-            Duration = duration.TotalMilliseconds,
-            Timestamp = DateTime.UtcNow
-        };
-
+        // Performance optimization: Use direct logging instead of anonymous objects
+        var durationMs = (long)duration.TotalMilliseconds;
         var logLevel = statusCode >= 400 ? LogLevel.Warning : LogLevel.Information;
         var allProperties = PrependStandardProperties(properties);
         _logger.Log(logLevel, "API Request: {Method} {Url} - {StatusCode} in {Duration}ms",
-            allProperties);
+            method, url, statusCode, durationMs);
     }
 
     public void LogWithCorrelation(string correlationId, string message, params object[] properties)
@@ -113,10 +101,71 @@ public class ConvexLogger : IConvexLogger
 
     public void LogBatch(params (string message, object[] properties)[] messages)
     {
-        // High-performance batch logging for billion-record scenarios
-        foreach (var (message, properties) in messages)
+        // Performance optimization: Parallel processing for true batch performance
+        if (messages.Length > 100) // Use parallel for large batches
         {
-            _logger.LogInformation(message, PrependStandardProperties(properties));
+            Parallel.ForEach(messages, message =>
+            {
+                _logger.LogInformation(message.message, PrependStandardProperties(message.properties));
+            });
+        }
+        else // Use sequential for small batches to avoid overhead
+        {
+            foreach (var (message, properties) in messages)
+            {
+                _logger.LogInformation(message, PrependStandardProperties(properties));
+            }
+        }
+    }
+
+    public void LogBatchOptimized(params (string message, object[] properties)[] messages)
+    {
+        // Ultra-high-performance batch logging with object pooling
+        if (messages.Length > 1000) // Use parallel for very large batches
+        {
+            Parallel.ForEach(messages, message =>
+            {
+                var buffer = PrependStandardProperties(message.properties);
+                try
+                {
+                    _logger.LogInformation(message.message, buffer);
+                }
+                finally
+                {
+                    // Return buffer to pool for reuse
+                    ReturnPropertyBuffer(buffer);
+                }
+            });
+        }
+        else if (messages.Length > 100) // Use parallel for large batches
+        {
+            Parallel.ForEach(messages, message =>
+            {
+                var buffer = PrependStandardProperties(message.properties);
+                try
+                {
+                    _logger.LogInformation(message.message, buffer);
+                }
+                finally
+                {
+                    ReturnPropertyBuffer(buffer);
+                }
+            });
+        }
+        else // Use sequential for small batches
+        {
+            foreach (var (message, properties) in messages)
+            {
+                var buffer = PrependStandardProperties(properties);
+                try
+                {
+                    _logger.LogInformation(message, buffer);
+                }
+                finally
+                {
+                    ReturnPropertyBuffer(buffer);
+                }
+            }
         }
     }
 
@@ -128,49 +177,103 @@ public class ConvexLogger : IConvexLogger
 
     public void LogBusinessException(Exception exception, string? correlationId = null, string? userId = null, string? requestId = null)
     {
-        var context = new List<object>();
+        // Performance optimization: Use pre-allocated array instead of List
+        var contextCount = 0;
+        if (!string.IsNullOrEmpty(correlationId)) contextCount += 2;
+        if (!string.IsNullOrEmpty(userId)) contextCount += 2;
+        if (!string.IsNullOrEmpty(requestId)) contextCount += 2;
+
+        var context = new object[contextCount];
+        var index = 0;
 
         if (!string.IsNullOrEmpty(correlationId))
-            context.AddRange(new object[] { "CorrelationId", correlationId });
+        {
+            context[index++] = "CorrelationId";
+            context[index++] = correlationId;
+        }
 
         if (!string.IsNullOrEmpty(userId))
-            context.AddRange(new object[] { "UserId", userId });
+        {
+            context[index++] = "UserId";
+            context[index++] = userId;
+        }
 
         if (!string.IsNullOrEmpty(requestId))
-            context.AddRange(new object[] { "RequestId", requestId });
+        {
+            context[index++] = "RequestId";
+            context[index++] = requestId;
+        }
 
-        var properties = PrependStandardProperties(context.ToArray());
+        var properties = PrependStandardProperties(context);
         _logger.LogError(exception, "Business exception occurred: {ExceptionType}", exception.GetType().Name);
     }
 
     public void LogValidationErrors(object[] validationErrors, string? correlationId = null, string? userId = null)
     {
-        var context = new List<object>();
+        // Performance optimization: Use pre-allocated array instead of List
+        var contextCount = 2; // ValidationErrors + validationErrors
+        if (!string.IsNullOrEmpty(correlationId)) contextCount += 2;
+        if (!string.IsNullOrEmpty(userId)) contextCount += 2;
+
+        var context = new object[contextCount];
+        var index = 0;
 
         if (!string.IsNullOrEmpty(correlationId))
-            context.AddRange(new object[] { "CorrelationId", correlationId });
+        {
+            context[index++] = "CorrelationId";
+            context[index++] = correlationId;
+        }
 
         if (!string.IsNullOrEmpty(userId))
-            context.AddRange(new object[] { "UserId", userId });
+        {
+            context[index++] = "UserId";
+            context[index++] = userId;
+        }
 
-        context.AddRange(new object[] { "ValidationErrors", validationErrors });
+        context[index++] = "ValidationErrors";
+        context[index++] = validationErrors;
 
-        var properties = PrependStandardProperties(context.ToArray());
+        var properties = PrependStandardProperties(context);
         _logger.LogWarning("Validation errors occurred: {ErrorCount} errors", validationErrors.Length);
     }
 
     private object[] PrependStandardProperties(object[] properties)
     {
-        // Pre-allocate array for better performance with high-volume logging
-        var result = new object[4 + properties.Length];
+        // Performance optimization: Use object pooling for high-volume scenarios
+        var totalLength = 4 + properties.Length;
+        
+        // Try to get a buffer from the pool
+        if (!_propertyBufferPool.TryDequeue(out var result) || result.Length < totalLength)
+        {
+            // Create new buffer if pool is empty or buffer is too small
+            result = new object[Math.Max(totalLength, MaxProperties)];
+        }
+
+        // Set standard properties
         result[0] = _serviceName;
         result[1] = _version;
         result[2] = _machineName;
         result[3] = _processId;
 
         // Copy properties array for better performance
-        Array.Copy(properties, 0, result, 4, properties.Length);
+        if (properties.Length > 0)
+        {
+            Array.Copy(properties, 0, result, 4, properties.Length);
+        }
 
+        // Return buffer to pool after use (caller should return it)
         return result;
+    }
+
+    /// <summary>
+    /// Returns a property buffer to the pool for reuse
+    /// </summary>
+    /// <param name="buffer">The buffer to return</param>
+    public static void ReturnPropertyBuffer(object[] buffer)
+    {
+        if (buffer != null && buffer.Length <= MaxProperties)
+        {
+            _propertyBufferPool.Enqueue(buffer);
+        }
     }
 }

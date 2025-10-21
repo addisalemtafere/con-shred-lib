@@ -25,6 +25,15 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public string GenerateJwtToken(string userId, string email, string[] roles, int expiresInMinutes = 60)
     {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email cannot be null or empty", nameof(email));
+        if (roles == null)
+            throw new ArgumentNullException(nameof(roles));
+        if (string.IsNullOrWhiteSpace(_options.JwtSecret))
+            throw new InvalidOperationException("JWT secret is not configured");
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId),
@@ -37,7 +46,10 @@ public class ConvexSecurityService : IConvexSecurityService
         // Add roles
         foreach (var role in roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
@@ -55,6 +67,11 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public bool ValidateJwtToken(string token)
     {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+        if (string.IsNullOrWhiteSpace(_options.JwtSecret))
+            return false;
+
         try
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
@@ -81,6 +98,11 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public ClaimsPrincipal? GetClaimsFromToken(string token)
     {
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+        if (string.IsNullOrWhiteSpace(_options.JwtSecret))
+            return null;
+
         try
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
@@ -107,6 +129,9 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public string GenerateApiKey(string serviceName, DateTime? expiresAt = null)
     {
+        if (string.IsNullOrWhiteSpace(serviceName))
+            throw new ArgumentException("Service name cannot be null or empty", nameof(serviceName));
+
         var keyData = new
         {
             ServiceName = serviceName,
@@ -124,6 +149,9 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public bool ValidateApiKey(string apiKey)
     {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return false;
+
         try
         {
             if (!apiKey.StartsWith("convex_"))
@@ -150,6 +178,9 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public ApiKeyInfo? GetApiKeyInfo(string apiKey)
     {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return null;
+
         try
         {
             if (!apiKey.StartsWith("convex_"))
@@ -170,11 +201,14 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public string HashPassword(string password)
     {
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password cannot be null or empty", nameof(password));
+
         using var rng = RandomNumberGenerator.Create();
         var salt = new byte[32];
         rng.GetBytes(salt);
 
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, _options.PasswordHashIterations, HashAlgorithmName.SHA256);
         var hash = pbkdf2.GetBytes(32);
 
         var hashBytes = new byte[64];
@@ -186,13 +220,21 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public bool VerifyPassword(string password, string hash)
     {
+        if (string.IsNullOrWhiteSpace(password))
+            return false;
+        if (string.IsNullOrWhiteSpace(hash))
+            return false;
+
         try
         {
             var hashBytes = Convert.FromBase64String(hash);
+            if (hashBytes.Length != 64)
+                return false;
+
             var salt = new byte[32];
             Array.Copy(hashBytes, 0, salt, 0, 32);
 
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
+            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, _options.PasswordHashIterations, HashAlgorithmName.SHA256);
             var testHash = pbkdf2.GetBytes(32);
 
             for (int i = 0; i < 32; i++)
@@ -211,6 +253,11 @@ public class ConvexSecurityService : IConvexSecurityService
 
     public string GenerateSecureRandomString(int length = 32)
     {
+        if (length <= 0)
+            throw new ArgumentException("Length must be greater than zero", nameof(length));
+        if (length > 1024)
+            throw new ArgumentException("Length cannot exceed 1024 characters", nameof(length));
+
         using var rng = RandomNumberGenerator.Create();
         var bytes = new byte[length];
         rng.GetBytes(bytes);

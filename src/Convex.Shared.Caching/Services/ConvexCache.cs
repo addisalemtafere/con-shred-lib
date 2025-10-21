@@ -32,6 +32,9 @@ public class ConvexCache : IConvexCache
 
     public async Task<T?> GetAsync<T>(string key)
     {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+            
         await _semaphore.WaitAsync();
         try
         {
@@ -41,10 +44,6 @@ public class ConvexCache : IConvexCache
 
             return JsonSerializer.Deserialize<T>(value, _jsonOptions);
         }
-        catch
-        {
-            return default;
-        }
         finally
         {
             _semaphore.Release();
@@ -53,6 +52,11 @@ public class ConvexCache : IConvexCache
 
     public async Task<bool> SetAsync<T>(string key, T value, TimeSpan? expiration = null)
     {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+        if (value == null)
+            throw new ArgumentNullException(nameof(value));
+            
         await _semaphore.WaitAsync();
         try
         {
@@ -67,10 +71,6 @@ public class ConvexCache : IConvexCache
             await _distributedCache.SetStringAsync(key, json, options);
             return true;
         }
-        catch
-        {
-            return false;
-        }
         finally
         {
             _semaphore.Release();
@@ -79,15 +79,14 @@ public class ConvexCache : IConvexCache
 
     public async Task<bool> RemoveAsync(string key)
     {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+            
         await _semaphore.WaitAsync();
         try
         {
             await _distributedCache.RemoveAsync(key);
             return true;
-        }
-        catch
-        {
-            return false;
         }
         finally
         {
@@ -97,15 +96,14 @@ public class ConvexCache : IConvexCache
 
     public async Task<bool> ExistsAsync(string key)
     {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+            
         await _semaphore.WaitAsync();
         try
         {
             var value = await _distributedCache.GetStringAsync(key);
             return !string.IsNullOrEmpty(value);
-        }
-        catch
-        {
-            return false;
         }
         finally
         {
@@ -115,6 +113,11 @@ public class ConvexCache : IConvexCache
 
     public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null)
     {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null or empty", nameof(key));
+        if (factory == null)
+            throw new ArgumentNullException(nameof(factory));
+            
         var cachedValue = await GetAsync<T>(key);
         if (cachedValue != null)
             return cachedValue;
@@ -126,6 +129,9 @@ public class ConvexCache : IConvexCache
 
     public async Task<int> RemoveManyAsync(params string[] keys)
     {
+        if (keys == null || keys.Length == 0)
+            return 0;
+            
         // Process in parallel batches for better performance with billion records
         const int batchSize = 100;
         var batches = keys.Chunk(batchSize);
@@ -139,15 +145,8 @@ public class ConvexCache : IConvexCache
     {
         var tasks = keys.Select(async key =>
         {
-            try
-            {
-                await _distributedCache.RemoveAsync(key);
-                return 1;
-            }
-            catch
-            {
-                return 0;
-            }
+            await _distributedCache.RemoveAsync(key);
+            return 1;
         });
 
         var results = await Task.WhenAll(tasks);
@@ -156,6 +155,9 @@ public class ConvexCache : IConvexCache
 
     public async Task<Dictionary<string, T?>> GetManyAsync<T>(params string[] keys)
     {
+        if (keys == null || keys.Length == 0)
+            return new Dictionary<string, T?>();
+            
         // Process in parallel batches for better performance with billion records
         const int batchSize = 100;
         var batches = keys.Chunk(batchSize);

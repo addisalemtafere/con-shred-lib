@@ -60,6 +60,9 @@ public static class ServiceCollectionExtensions
                 var serviceProvider = services.BuildServiceProvider();
                 var securityOptions = serviceProvider.GetRequiredService<IOptions<ConvexSecurityOptions>>().Value;
 
+                if (string.IsNullOrWhiteSpace(securityOptions.JwtSecret))
+                    throw new InvalidOperationException("JWT secret is not configured");
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -139,10 +142,19 @@ public static class ServiceCollectionExtensions
                 var serviceProvider = services.BuildServiceProvider();
                 var securityOptions = serviceProvider.GetRequiredService<IOptions<ConvexSecurityOptions>>().Value;
 
-                builder.WithOrigins(securityOptions.AllowedOrigins)
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                if (securityOptions.AllowedOrigins?.Length > 0)
+                {
+                    builder.WithOrigins(securityOptions.AllowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                }
+                else
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                }
             });
         });
 

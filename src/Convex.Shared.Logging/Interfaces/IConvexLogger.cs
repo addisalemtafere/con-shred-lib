@@ -82,6 +82,12 @@ public interface IConvexLogger
     void LogBatch(params (string message, object[] properties)[] messages);
 
     /// <summary>
+    /// Ultra-high-performance batch logging with object pooling
+    /// </summary>
+    /// <param name="messages">Batch of messages to log</param>
+    void LogBatchOptimized(params (string message, object[] properties)[] messages);
+
+    /// <summary>
     /// Log exception with structured context
     /// </summary>
     /// <param name="exception">The exception to log</param>

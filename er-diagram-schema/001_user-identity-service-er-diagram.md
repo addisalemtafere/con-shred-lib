@@ -4,659 +4,52 @@
 
 Based on your existing **ASP.NET Core Identity + OpenID Connect + OpenIddict** implementation, this optimized ER diagram shows the User & Identity Service database schema with multi-tenant support.
 
-```mermaid
-erDiagram
-    TENANTS {
-        uuid id PK
-        varchar tenant_code UK
-        varchar tenant_name
-        text description
-        boolean is_active
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    ASPNET_USERS {
-        varchar id PK
-        uuid tenant_id FK
-        varchar username
-        varchar normalized_username
-        varchar email
-        varchar normalized_email
-        boolean email_confirmed
-        varchar password_hash
-        varchar security_stamp
-        varchar concurrency_stamp
-        varchar phone_number
-        boolean phone_number_confirmed
-        boolean two_factor_enabled
-        timestamp lockout_end
-        boolean lockout_enabled
-        integer access_failed_count
-        varchar friendly_name
-        varchar job_title
-        varchar full_name
-        varchar configuration
-        boolean is_enabled
-        boolean is_broker
-        varchar created_by
-        varchar updated_by
-        timestamp created_date
-        timestamp updated_date
-        integer rowVersion
-    }
-    
-    ASPNET_ROLES {
-        varchar id PK
-        uuid tenant_id FK
-        varchar name
-        varchar normalized_name
-        varchar concurrency_stamp
-        varchar description
-        varchar created_by
-        varchar updated_by
-        timestamp created_date
-        timestamp updated_date
-        integer rowVersion
-    }
-    
-    ASPNET_USER_ROLES {
-        varchar user_id PK
-        varchar role_id PK
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    ASPNET_USER_CLAIMS {
-        int id PK
-        varchar user_id FK
-        varchar claim_type
-        varchar claim_value
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    ASPNET_ROLE_CLAIMS {
-        int id PK
-        varchar role_id FK
-        varchar claim_type
-        varchar claim_value
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    ASPNET_USER_LOGINS {
-        varchar login_provider PK
-        varchar provider_key PK
-        varchar provider_display_name
-        varchar user_id FK
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    ASPNET_USER_TOKENS {
-        varchar user_id PK
-        varchar login_provider PK
-        varchar name PK
-        varchar value
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    OPENIDDICT_APPLICATIONS {
-        varchar id PK
-        varchar client_id UK
-        varchar client_secret
-        varchar concurrency_stamp
-        varchar consent_type
-        varchar display_name
-        varchar type
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    OPENIDDICT_AUTHORIZATIONS {
-        varchar id PK
-        varchar application_id FK
-        varchar concurrency_stamp
-        varchar scopes
-        varchar status
-        varchar subject
-        varchar type
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    OPENIDDICT_SCOPES {
-        varchar id PK
-        varchar concurrency_stamp
-        varchar description
-        varchar descriptions
-        varchar display_name
-        varchar display_names
-        varchar name
-        varchar properties
-        varchar resources
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    OPENIDDICT_TOKENS {
-        varchar id PK
-        varchar application_id FK
-        varchar authorization_id FK
-        varchar concurrency_stamp
-        timestamp creation_date
-        timestamp expiration_date
-        varchar payload
-        varchar properties
-        timestamp redemption_date
-        varchar reference_id
-        varchar scopes
-        varchar status
-        varchar subject
-        varchar type
-        uuid tenant_id FK
-        integer rowVersion
-    }
-    
-    AGENTS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar agent_code
-        varchar user_id FK
-        decimal commission_rate
-        decimal max_commission
-        boolean is_active
-        boolean is_verified
-        varchar created_by
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    AGENT_BRANCHES {
-        uuid id PK
-        uuid tenant_id FK
-        uuid agent_id FK
-        varchar branch_name
-        varchar branch_code
-        varchar location
-        text address
-        varchar phone_number
-        varchar email
-        boolean is_active
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    BRANCHES {
-        uuid id PK
-        uuid tenant_id FK
-        uuid agent_id FK
-        varchar branch_id UK
-        varchar branch_secret
-        varchar branch_name
-        varchar branch_city
-        varchar branch_address
-        decimal credit_limit
-        integer min_stake
-        decimal offlinebet_sales_limit
-        decimal branch_deposit_limit
-        decimal offlinebet_duplicate_stake_limit
-        integer offlinebet_duplicate_number_limit
-        time operating_start_time
-        time operating_end_time
-        varchar branch_channel
-        boolean is_disabled
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    BRANCH_ROLES {
-        uuid id PK
-        uuid tenant_id FK
-        uuid branch_id FK
-        varchar role_name
-        varchar role_permissions
-        jsonb role_config
-        boolean is_active
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    BRANCH_TRANSACTIONS {
-        uuid id PK
-        uuid tenant_id FK
-        uuid branch_id FK
-        varchar user_id FK
-        varchar transaction_type
-        decimal transaction_amount
-        varchar transaction_status
-        varchar transaction_reference
-        jsonb transaction_details
-        timestamp transaction_date
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    SALES_PERSONNEL {
-        uuid id PK
-        uuid tenant_id FK
-        uuid agent_id FK
-        uuid branch_id FK
-        varchar user_id FK
-        varchar sales_channel
-        varchar phone_number
-        varchar sales_city
-        varchar sales_state
-        varchar sales_address
-        text sales_notes
-        varchar attached_document
-        boolean is_disabled
-        timestamp last_seen
-        timestamp last_confirmed_ticket_at
-        timestamp last_payout_at
-        timestamp last_deposit_at
-        integer access_period_days
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    BRANCH_STAKE_LIMITS {
-        uuid id PK
-        uuid tenant_id FK
-        uuid branch_id FK
-        decimal min_odd
-        decimal max_odd
-        decimal allowed_max_stake
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    USER_AGENT_ASSIGNMENTS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar user_id FK
-        uuid agent_id FK
-        varchar assignment_type
-        boolean is_active
-        varchar assigned_by
-        timestamp assigned_at
-        timestamp unassigned_at
-        text notes
-        integer rowVersion
-    }
-    
-    TENANT_SETTINGS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar setting_key
-        text setting_value
-        varchar setting_type
-        text description
-        boolean is_encrypted
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    OTP_VERIFICATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar user_id FK
-        varchar code
-        varchar otp_type
-        varchar phone_number
-        varchar state
-        timestamp expires_at
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    SMS_TEMPLATES {
-        uuid id PK
-        uuid tenant_id FK
-        varchar template_name
-        text registration_verification_message
-        text phone_confirmation_message
-        text password_reset_message
-        text deposit_success_message
-        text bet_placed_message
-        text bet_won_message
-        text withdrawal_message
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    TENANT_CONFIGURATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar config_key
-        text config_value
-        varchar config_type
-        boolean is_encrypted
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    
-    
-    TENANT_UI_CONFIGURATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar frontend_template
-        varchar landing_page_match_list
-        varchar mobile_submenu_type
-        varchar mobile_match_list_type
-        varchar mobile_fixed_footer_type
-        varchar mobile_menu_bar_type
-        varchar desktop_menu_bar_type
-        varchar print_code_type
-        boolean show_ticket_id
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    TENANT_REFERRAL_CONFIGURATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        boolean referral_support
-        varchar referral_type
-        decimal min_bet_amount
-        decimal min_deposit_amount
-        decimal award_amount
-        boolean badged_commission_support
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    TENANT_TRANSFER_CONFIGURATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        boolean transfer_enabled
-        boolean contact_confirm
-        decimal min_transfer_amount
-        decimal max_transfer_amount
-        integer max_daily_transfers
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    TENANT_GENERAL_CONFIGURATIONS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar country_code
-        varchar currency
-        varchar language_code
-        varchar country
-        varchar domain_name
-        varchar contact_number
-        boolean online_bet_support
-        boolean offline_bet_support
-        boolean offline_payout_enabled
-        boolean language_supported
-        varchar underage_limit
-        varchar registration_flow
-        integer rowVersion
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    AUDIT_LOGS {
-        uuid id PK
-        uuid tenant_id FK
-        varchar user_id FK
-        varchar action
-        varchar entity_type
-        varchar entity_id
-        jsonb old_values
-        jsonb new_values
-        inet ip_address
-        text user_agent
-        varchar request_id
-        integer rowVersion
-        timestamp created_at
-    }
-
-    %% Core Relationships
-    TENANTS ||--o{ ASPNET_USERS : "has"
-    TENANTS ||--o{ ASPNET_ROLES : "has"
-    TENANTS ||--o{ ASPNET_USER_ROLES : "has"
-    TENANTS ||--o{ ASPNET_USER_CLAIMS : "has"
-    TENANTS ||--o{ ASPNET_ROLE_CLAIMS : "has"
-    TENANTS ||--o{ ASPNET_USER_LOGINS : "has"
-    TENANTS ||--o{ ASPNET_USER_TOKENS : "has"
-    TENANTS ||--o{ OPENIDDICT_APPLICATIONS : "has"
-    TENANTS ||--o{ OPENIDDICT_AUTHORIZATIONS : "has"
-    TENANTS ||--o{ OPENIDDICT_SCOPES : "has"
-    TENANTS ||--o{ OPENIDDICT_TOKENS : "has"
-    TENANTS ||--o{ AGENTS : "has"
-    TENANTS ||--o{ AGENT_BRANCHES : "has"
-    TENANTS ||--o{ USER_AGENT_ASSIGNMENTS : "has"
-    TENANTS ||--o{ TENANT_SETTINGS : "has"
-    TENANTS ||--o{ OTP_VERIFICATIONS : "has"
-    TENANTS ||--o{ SMS_TEMPLATES : "has"
-    TENANTS ||--o{ TENANT_CONFIGURATIONS : "has"
-    TENANTS ||--o{ TENANT_UI_CONFIGURATIONS : "has"
-    TENANTS ||--o{ TENANT_REFERRAL_CONFIGURATIONS : "has"
-    TENANTS ||--o{ TENANT_TRANSFER_CONFIGURATIONS : "has"
-    TENANTS ||--o{ TENANT_GENERAL_CONFIGURATIONS : "has"
-    TENANTS ||--o{ AUDIT_LOGS : "has"
-    
-    %% ASP.NET Identity Relationships
-    ASPNET_USERS ||--o{ ASPNET_USER_ROLES : "has"
-    ASPNET_USERS ||--o{ ASPNET_USER_CLAIMS : "has"
-    ASPNET_USERS ||--o{ ASPNET_USER_LOGINS : "has"
-    ASPNET_USERS ||--o{ ASPNET_USER_TOKENS : "has"
-    ASPNET_ROLES ||--o{ ASPNET_USER_ROLES : "has"
-    ASPNET_ROLES ||--o{ ASPNET_ROLE_CLAIMS : "has"
-    
-    %% OpenIddict Relationships
-    OPENIDDICT_APPLICATIONS ||--o{ OPENIDDICT_AUTHORIZATIONS : "has"
-    OPENIDDICT_APPLICATIONS ||--o{ OPENIDDICT_TOKENS : "has"
-    OPENIDDICT_AUTHORIZATIONS ||--o{ OPENIDDICT_TOKENS : "has"
-    
-    %% Agent Relationships
-    ASPNET_USERS ||--o{ AGENTS : "is"
-    AGENTS ||--o{ AGENT_BRANCHES : "has"
-    AGENTS ||--o{ USER_AGENT_ASSIGNMENTS : "manages"
-    ASPNET_USERS ||--o{ USER_AGENT_ASSIGNMENTS : "assigned_to"
-    AGENTS ||--o{ BRANCHES : "manages"
-    AGENTS ||--o{ SALES_PERSONNEL : "manages"
-    
-    %% Branch Relationships
-    BRANCHES ||--o{ BRANCH_ROLES : "has"
-    BRANCHES ||--o{ BRANCH_TRANSACTIONS : "processes"
-    BRANCHES ||--o{ SALES_PERSONNEL : "employs"
-    BRANCHES ||--o{ BRANCH_STAKE_LIMITS : "has"
-    
-    %% Django-Inspired Relationships
-    ASPNET_USERS ||--o{ OTP_VERIFICATIONS : "has"
-    TENANTS ||--o{ SMS_TEMPLATES : "has"
-    TENANTS ||--o{ TENANT_CONFIGURATIONS : "has"
-```
-
 ## 🎯 **Optimized Architecture Based on Your Current Implementation**
+Caption: Summary of core identity and OAuth components used in this service.
 
 ### **✅ ASP.NET Core Identity Integration**
-- **Standard Identity Tables** → `ASPNET_USERS`, `ASPNET_ROLES`, `ASPNET_USER_ROLES`
-- **Claims-Based Authorization** → `ASPNET_USER_CLAIMS`, `ASPNET_ROLE_CLAIMS`
-- **External Login Providers** → `ASPNET_USER_LOGINS`
-- **Token Management** → `ASPNET_USER_TOKENS`
-- **Multi-Tenant Support** → `tenant_id` in all Identity tables
+Caption: Core ASP.NET Identity features and associated tables.
+
+| Feature | Tables / Notes |
+|--------|-----------------|
+| Standard Identity Tables | `ASPNET_USERS`, `ASPNET_ROLES`, `ASPNET_USER_ROLES` |
+| Claims-Based Authorization | `ASPNET_USER_CLAIMS`, `ASPNET_ROLE_CLAIMS` |
+| External Login Providers | `ASPNET_USER_LOGINS` |
+| Token Management | `ASPNET_USER_TOKENS` |
+| Multi-Tenant Support | `tenant_id` in all Identity tables |
+
+Context notes (our sportsbook):
+- `ASPNET_USER_LOGINS`: maps a bettor or staff account to an external IdP (e.g., Google/Microsoft) when SSO is enabled for backoffice.
+- `ASPNET_USER_TOKENS`: app-managed, per-user tokens for flows like password reset, phone/email confirmation, and 2FA; not OAuth access tokens.
 
 ### **✅ OpenIddict Integration**
-- **OAuth 2.0 / OpenID Connect** → `OPENIDDICT_APPLICATIONS`, `OPENIDDICT_TOKENS`
-- **Authorization Management** → `OPENIDDICT_AUTHORIZATIONS`
-- **Scope Management** → `OPENIDDICT_SCOPES`
-- **Multi-Tenant OAuth** → `tenant_id` in all OpenIddict tables
+Caption: OAuth 2.0 / OpenID Connect components and tables.
 
-### **✅ SRS Requirements Coverage**
+| Feature | Tables / Notes |
+|--------|-----------------|
+| OAuth 2.0 / OpenID Connect | `OPENIDDICT_APPLICATIONS`, `OPENIDDICT_TOKENS` |
+| Authorization Management | `OPENIDDICT_AUTHORIZATIONS` |
+| Scope Management | `OPENIDDICT_SCOPES` |
+| Multi-Tenant OAuth | `tenant_id` in all OpenIddict tables |
 
-#### **FR-030: Agent System** ✅
-- **Agent Onboarding** → `AGENTS` table with `user_id` FK to `ASPNET_USERS`
-- **Commission Management** → `commission_rate`, `max_commission` fields
-- **Agent Branches** → `AGENT_BRANCHES` table
-- **User-Agent Assignments** → `USER_AGENT_ASSIGNMENTS` table
-
-#### **FR-031: Tenant Management** ✅
-- **Tenant Isolation** → `tenant_id` in all tables
-- **Tenant Configuration** → `TENANT_SETTINGS` table
-- **Multi-Tenant OAuth** → OpenIddict tables with `tenant_id`
-
-#### **FR-032: User Management** ✅
-- **User Registration** → `ASPNET_USERS` with custom fields
-- **Authentication** → Built-in Identity authentication
-- **Role Management** → `ASPNET_ROLES` with tenant isolation
-- **Claims Management** → `ASPNET_USER_CLAIMS` for permissions
-- **Account Security** → Built-in lockout, 2FA, password reset
-
-#### **FR-033: OAuth 2.0 and OpenID Connect** ✅
-- **OAuth 2.0 Server** → OpenIddict implementation
-- **OpenID Connect** → Built-in OpenIddict support
-- **JWT Tokens** → `OPENIDDICT_TOKENS` table
-- **Client Management** → `OPENIDDICT_APPLICATIONS` table
-- **Scope Management** → `OPENIDDICT_SCOPES` table
-
-#### **FR-034: Client Management** ✅
-- **OAuth Clients** → `OPENIDDICT_APPLICATIONS` with tenant isolation
-- **Client Credentials** → OpenIddict client credentials flow
-- **Client Scopes** → `OPENIDDICT_SCOPES` with tenant support
-- **Client Security** → Built-in OpenIddict security features
-
-## 🔒 **Security Features**
-
-### **1. Multi-Tenant Isolation**
-- **TenantId in every table** for complete data isolation
-- **ASP.NET Identity with tenant support** → Standard Identity tables + tenant_id
-- **OpenIddict with tenant isolation** → OAuth clients per tenant
-- **No cross-tenant data access** possible
-
-### **2. Authentication Security**
-- **ASP.NET Core Identity** → Built-in password hashing, 2FA, lockout
-- **OpenIddict OAuth 2.0** → Industry-standard OAuth implementation
-- **Claims-based authorization** → Flexible permission system
-- **External login providers** → Social login support
-- **Token management** → Secure token storage and validation
-
-### **3. Audit & Compliance**
-- **Complete audit trail** → `AUDIT_LOGS` for all actions
-- **Identity audit** → Built-in Identity audit features
-- **OAuth audit** → OpenIddict token and authorization tracking
-- **Multi-tenant audit** → Tenant-scoped audit logging
-
-## 🚀 **Performance Optimizations**
-
-### **1. Standard Identity Performance**
-- **Built-in Identity optimization** → ASP.NET Core Identity performance
-- **OpenIddict performance** → Optimized OAuth token handling
-- **Multi-tenant indexing** → Composite indexes on (tenant_id, other_columns)
-- **Claims caching** → Efficient claims resolution
-
-### **2. Query Optimization**
-- **TenantId filtering** on all queries
-- **Identity queries** → Optimized user and role lookups
-- **OAuth queries** → Efficient token and client lookups
-- **Agent queries** → Optimized agent and assignment lookups
-
-## 🎯 **Key Benefits of This Optimized Approach**
-
-### **✅ Leverages Your Existing Implementation**
-- **Reuses ASP.NET Core Identity** → No need to reinvent authentication
-- **Reuses OpenIddict** → No need to build OAuth from scratch
-- **Familiar patterns** → Your team already knows these technologies
-- **Proven security** → Industry-standard authentication and authorization
-
-### **✅ Multi-Tenant Ready**
-- **TenantId in all tables** → Complete data isolation
-- **Tenant-scoped OAuth** → Each tenant has their own OAuth clients
-- **Tenant-scoped Identity** → Users and roles per tenant
-- **Scalable architecture** → Supports unlimited tenants
-
-### **✅ Enterprise Features**
-- **Claims-based authorization** → Flexible permission system
-- **External login providers** → Social login support
-- **Two-factor authentication** → Built-in 2FA support
-- **Account lockout** → Built-in security features
-- **Audit logging** → Complete audit trail
-
-### **✅ Performance Optimized**
-- **Built-in Identity performance** → ASP.NET Core Identity optimization
-- **OpenIddict performance** → Optimized OAuth token handling
-- **Multi-tenant indexing** → Efficient tenant-scoped queries
-- **Claims caching** → Fast permission checks
-
-## 🔍 **Insights from FlatOddAPI Analysis**
-
-### **✅ Django Patterns to Consider**
-- **Agent System** → `Agent` model with `user` OneToOneField to Django User
-- **Role-Based Access** → `AgentRole` with role choices and permissions
-- **OTP System** → `OTP` model for verification codes
-- **SMS Templates** → `SMSTEMPLATE` for notification messages
-- **Configuration Management** → `MainConfiguration` for tenant settings
-- **Wallet System** → `Wallet` with balance partitions (payable, deductable, nonwithdrawable)
-- **Transaction Tracking** → `BankTransaction` for financial operations
-- **Audit Logging** → Built-in Django signals and logging
-
-### **✅ Key Django Features to Migrate**
-1. **Agent Management** → Your current `Agent` model with commission tracking
-2. **OTP Verification** → Your current `OTP` system for phone verification
-3. **SMS Integration** → Your current SMS template system
-4. **Wallet Management** → Your current wallet balance system
-5. **Transaction History** → Your current transaction tracking
-6. **Configuration System** → Your current tenant configuration approach
-
-### **✅ Migration Strategy**
-- **Preserve Business Logic** → Keep your current agent and wallet logic
-- **Enhance with .NET** → Add ASP.NET Core Identity + OpenIddict
-- **Multi-Tenant Support** → Add tenant_id to all existing patterns
-- **Modern Security** → Upgrade from Django auth to OAuth 2.0 + OpenID Connect
-
-## 📋 **Next Steps**
-
-1. **✅ ER Diagram Complete** - Optimized for your existing implementation
-2. **⏳ SQL Schema** - Create database tables with tenant_id
-3. **⏳ Entity Models** - Extend ApplicationUser with tenant support
-4. **⏳ Service Implementation** - Build User & Identity Service
-5. **⏳ Testing** - Unit and integration tests
-
----
-
-**This optimized ER diagram leverages your existing ASP.NET Core Identity + OpenIddict implementation while incorporating proven patterns from your Django FlatOddAPI system and adding multi-tenant support for your betting system!** 🎯
+Context notes (our sportsbook):
+- `OPENIDDICT_APPLICATIONS`: registered client apps such as the Public Web, Mobile App, Backoffice, and Machine-to-Machine clients per tenant.
+- `OPENIDDICT_TOKENS`: OAuth/OIDC tokens (access/refresh/device/code) issued to clients; used by API Gateway and microservices to authenticate requests.
 
 ## 📊 **Complete Table Organization & Structure**
+Caption: High-level index of tables by domain area.
 
 ### **🏢 1. TENANT MANAGEMENT TABLES**
+Caption: Tables governing tenant configuration and policies.
 | Table Name | Purpose | Key Fields |
 |------------|---------|------------|
 | `TENANTS` | Core tenant information | `id`, `tenant_code`, `tenant_name`, `is_active` |
-| `TENANT_SETTINGS` | Tenant-specific settings | `tenant_id`, `setting_key`, `setting_value` |
-| `TENANT_CONFIGURATIONS` | Advanced tenant configurations | `tenant_id`, `config_key`, `config_value` |
-| `TENANT_MARKET_CONFIGURATIONS` | Market enablement per tenant | `tenant_id`, `sport_id`, `league_id`, `market_type`, `is_enabled` |
-| `TENANT_BETTING_LIMITS` | Betting limits per tenant | `tenant_id`, `limit_type`, `limit_value`, `time_period` |
-| `TENANT_PAYMENT_CONFIGURATIONS` | Payment method configurations | `tenant_id`, `payment_method`, `is_enabled`, `deposit_enabled`, `withdraw_enabled` |
-| `TENANT_SMS_CONFIGURATIONS` | SMS notification settings | `tenant_id`, `sms_provider`, `registration_confirmation_enabled` |
-| `TENANT_WALLET_CONFIGURATIONS` | Wallet and balance settings | `tenant_id`, `balance_deposit_limit`, `transfer_require_otp` |
-| `TENANT_UI_CONFIGURATIONS` | Frontend UI settings | `tenant_id`, `frontend_template`, `mobile_submenu_type` |
-| `TENANT_REFERRAL_CONFIGURATIONS` | Referral system settings | `tenant_id`, `referral_support`, `referral_type`, `award_amount` |
-| `TENANT_TRANSFER_CONFIGURATIONS` | User transfer settings | `tenant_id`, `transfer_enabled`, `min_transfer_amount` |
-| `TENANT_GENERAL_CONFIGURATIONS` | General system settings | `tenant_id`, `country_code`, `currency`, `language_code` |
+| `TENANT_SETTINGS` | Cross-cutting tenant settings | `tenant_id`, `setting_key`, `setting_value` |
+| `TENANT_CONFIGURATIONS` | Cross-cutting config (non-domain-specific) | `tenant_id`, `config_key`, `config_value` |
+| `TENANT_GENERAL_CONFIGURATIONS` | General tenant settings | `tenant_id`, `country_code`, `currency`, `language_code` |
 
 ### **👤 2. ASP.NET CORE IDENTITY TABLES**
+Caption: Identity user, role, and related mapping tables.
 | Table Name | Purpose | Key Fields |
 |------------|---------|------------|
 | `ASPNET_USERS` | User accounts with tenant support | `id`, `tenant_id`, `username`, `email`, `password_hash` |
@@ -668,6 +61,7 @@ erDiagram
 | `ASPNET_USER_TOKENS` | User authentication tokens | `user_id`, `login_provider`, `name`, `value`, `tenant_id` |
 
 ### **🔐 3. OAUTH 2.0 / OPENID CONNECT TABLES**
+Caption: Summary list of OAuth-related tables.
 | Table Name | Purpose | Key Fields |
 |------------|---------|------------|
 | `OPENIDDICT_APPLICATIONS` | OAuth client applications | `id`, `client_id`, `client_secret`, `tenant_id` |
@@ -675,30 +69,275 @@ erDiagram
 | `OPENIDDICT_SCOPES` | OAuth scopes/permissions | `id`, `name`, `description`, `tenant_id` |
 | `OPENIDDICT_TOKENS` | OAuth access/refresh tokens | `id`, `application_id`, `subject`, `type`, `tenant_id` |
 
-### **👨‍💼 4. AGENT SYSTEM TABLES**
-| Table Name | Purpose | Key Fields |
-|------------|---------|------------|
-| `AGENTS` | Agent profiles and settings | `id`, `tenant_id`, `user_id`, `commission_rate`, `is_active` |
-| `AGENT_BRANCHES` | Agent branch locations | `id`, `tenant_id`, `agent_id`, `branch_name`, `location` |
-| `USER_AGENT_ASSIGNMENTS` | User-agent relationships | `id`, `tenant_id`, `user_id`, `agent_id`, `assignment_type` |
-
-### **📱 5. VERIFICATION & NOTIFICATION TABLES**
-| Table Name | Purpose | Key Fields |
-|------------|---------|------------|
-| `OTP_VERIFICATIONS` | Phone verification codes | `id`, `tenant_id`, `user_id`, `code`, `otp_type`, `phone_number` |
-| `SMS_TEMPLATES` | SMS message templates | `id`, `tenant_id`, `template_name`, `registration_verification_message` |
-
-### **📋 6. AUDIT & LOGGING TABLES**
+### **📋 4. AUDIT & LOGGING TABLES**
+Caption: Summary list of auditing tables.
 | Table Name | Purpose | Key Fields |
 |------------|---------|------------|
 | `AUDIT_LOGS` | Complete audit trail | `id`, `tenant_id`, `user_id`, `action`, `entity_type`, `old_values`, `new_values` |
 
+## 📚 **Detailed Table Definitions**
+Caption: Column-level specifications, defaults, relations, and brief remarks.
+
+### 1) `TENANTS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | uuid | gen_random_uuid() | PK | Tenant ID |
+| 2 | tenant_code | varchar | null | UK | Short unique code |
+| 3 | tenant_name | varchar | null | - | Display name |
+| 4 | description | text | null | - | Optional |
+| 5 | is_active | boolean | true | - | Enable/disable tenant |
+| 6 | rowVersion | integer | 1 | - | Concurrency token |
+| 7 | created_at | timestamp | now() | - | - |
+| 8 | updated_at | timestamp | now() | - | - |
+
+### 2) `ASPNET_USERS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | Identity user ID |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | Multi-tenant isolation |
+| 3 | username | varchar | null | UK(tenant_id, normalized_username) | - |
+| 4 | normalized_username | varchar | null | - | Upper-cased |
+| 5 | email | varchar | null | - | - |
+| 6 | normalized_email | varchar | null | - | Upper-cased |
+| 7 | email_confirmed | boolean | false | - | - |
+| 8 | password_hash | varchar | null | - | ASP.NET Core Identity |
+| 9 | security_stamp | varchar | null | - | - |
+| 10 | concurrency_stamp | varchar | null | - | - |
+| 11 | phone_number | varchar | null | - | E.164 |
+| 12 | phone_number_confirmed | boolean | false | - | - |
+| 13 | two_factor_enabled | boolean | false | - | - |
+| 14 | lockout_end | timestamp | null | - | - |
+| 15 | lockout_enabled | boolean | true | - | - |
+| 16 | access_failed_count | integer | 0 | - | - |
+| 17 | friendly_name | varchar | null | - | - |
+| 18 | job_title | varchar | null | - | - |
+| 19 | full_name | varchar | null | - | - |
+| 20 | configuration | varchar | null | - | JSON as string |
+| 21 | is_enabled | boolean | true | - | Soft disable user |
+| 22 | is_broker | boolean | false | - | For agent ecosystem |
+| 23 | created_by | varchar | null | - | - |
+| 24 | updated_by | varchar | null | - | - |
+| 25 | created_date | timestamp | now() | - | - |
+| 26 | updated_date | timestamp | now() | - | - |
+| 27 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 3) `ASPNET_ROLES`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | Role ID |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | Tenant-scoped role |
+| 3 | name | varchar | null | UK(tenant_id, normalized_name) | - |
+| 4 | normalized_name | varchar | null | - | Upper-cased |
+| 5 | concurrency_stamp | varchar | null | - | - |
+| 6 | description | varchar | null | - | - |
+| 7 | created_by | varchar | null | - | - |
+| 8 | updated_by | varchar | null | - | - |
+| 9 | created_date | timestamp | now() | - | - |
+| 10 | updated_date | timestamp | now() | - | - |
+| 11 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 4) `ASPNET_USER_ROLES`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | user_id | varchar | - | FK→ASPNET_USERS.id | PK part |
+| 2 | role_id | varchar | - | FK→ASPNET_ROLES.id | PK part |
+| 3 | tenant_id | uuid | - | FK→TENANTS.id | Partition key |
+| 4 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 5) `OPENIDDICT_APPLICATIONS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | Client record |
+| 2 | client_id | varchar | null | UK | Public client ID |
+| 3 | client_secret | varchar | null | - | Hashed if confidential |
+| 4 | concurrency_stamp | varchar | null | - | - |
+| 5 | consent_type | varchar | null | - | - |
+| 6 | display_name | varchar | null | - | - |
+| 7 | type | varchar | null | - | public/confidential |
+| 8 | tenant_id | uuid | - | FK→TENANTS.id | Tenant-scoped client |
+| 9 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 6) `OPENIDDICT_TOKENS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | Token record |
+| 2 | application_id | varchar | - | FK→OPENIDDICT_APPLICATIONS.id | - |
+| 3 | authorization_id | varchar | null | FK→OPENIDDICT_AUTHORIZATIONS.id | - |
+| 4 | creation_date | timestamp | now() | - | - |
+| 5 | expiration_date | timestamp | null | - | - |
+| 6 | payload | varchar | null | - | Compact token data |
+| 7 | properties | varchar | null | - | - |
+| 8 | redemption_date | timestamp | null | - | - |
+| 9 | reference_id | varchar | null | UK (optional) | Reference tokens |
+| 10 | scopes | varchar | null | - | Space-separated |
+| 11 | status | varchar | null | - | valid/revoked |
+| 12 | subject | varchar | - | FK→ASPNET_USERS.id | Token owner |
+| 13 | type | varchar | - | - | access/refresh/etc |
+| 14 | tenant_id | uuid | - | FK→TENANTS.id | Tenant partition |
+| 15 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 7) `TENANT_SETTINGS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | uuid | gen_random_uuid() | PK | - |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | - |
+| 3 | setting_key | varchar | - | UK(tenant_id, setting_key) | - |
+| 4 | setting_value | text | null | - | Can be JSON |
+| 5 | setting_type | varchar | 'string' | - | string/int/bool/json |
+| 6 | description | text | null | - | - |
+| 7 | is_encrypted | boolean | false | - | Secrets |
+| 8 | rowVersion | integer | 1 | - | Concurrency token |
+| 9 | created_at | timestamp | now() | - | - |
+| 10 | updated_at | timestamp | now() | - | - |
+
+### 8) `AUDIT_LOGS`
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | uuid | gen_random_uuid() | PK | - |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | - |
+| 3 | user_id | varchar | null | FK→ASPNET_USERS.id | Actor if any |
+| 4 | action | varchar | - | - | e.g., CreateUser |
+| 5 | entity_type | varchar | - | - | e.g., ASPNET_USERS |
+| 6 | entity_id | varchar | null | - | Target entity key |
+| 7 | old_values | jsonb | '{}' | - | Before state |
+| 8 | new_values | jsonb | '{}' | - | After state |
+| 9 | ip_address | inet | null | - | - |
+| 10 | user_agent | text | null | - | - |
+| 11 | request_id | varchar | null | - | Correlation ID |
+| 12 | rowVersion | integer | 1 | - | Concurrency token |
+| 13 | created_at | timestamp | now() | - | - |
+
+### 9) `ASPNET_USER_CLAIMS`
+Caption: User-specific claims
+Description: Stores per-user claims for fine-grained authorization.
+Purpose: Attach permissions or attributes directly to users.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | int | identity | PK | - |
+| 2 | user_id | varchar | - | FK→ASPNET_USERS.id | - |
+| 3 | claim_type | varchar | - | - | e.g., permission |
+| 4 | claim_value | varchar | - | - | e.g., Bet.Place |
+| 5 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 6 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 10) `ASPNET_ROLE_CLAIMS`
+Caption: Role-based claims
+Description: Claims granted to roles and inherited by members.
+Purpose: Centralize permission sets per role.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | int | identity | PK | - |
+| 2 | role_id | varchar | - | FK→ASPNET_ROLES.id | - |
+| 3 | claim_type | varchar | - | - | - |
+| 4 | claim_value | varchar | - | - | - |
+| 5 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 6 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 11) `ASPNET_USER_LOGINS`
+Caption: External login providers
+Description: Links users to external identity providers.
+Purpose: Support social logins and federated auth.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | login_provider | varchar | - | PK part | e.g., google |
+| 2 | provider_key | varchar | - | PK part | External user key |
+| 3 | provider_display_name | varchar | null | - | - |
+| 4 | user_id | varchar | - | FK→ASPNET_USERS.id | - |
+| 5 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 6 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 12) `ASPNET_USER_TOKENS`
+Caption: User tokens
+Description: Stores ancillary tokens (e.g., reset, 2FA) for users.
+Purpose: Manage user-related token state.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | user_id | varchar | - | PK part, FK→ASPNET_USERS.id | - |
+| 2 | login_provider | varchar | - | PK part | - |
+| 3 | name | varchar | - | PK part | e.g., ResetPassword |
+| 4 | value | varchar | null | - | Token value/metadata |
+| 5 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 6 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 13) `OPENIDDICT_AUTHORIZATIONS`
+Caption: OAuth authorizations
+Description: User consent and authorization state for clients.
+Purpose: Track grants and sessions per client/user.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | - |
+| 2 | application_id | varchar | - | FK→OPENIDDICT_APPLICATIONS.id | - |
+| 3 | concurrency_stamp | varchar | null | - | - |
+| 4 | scopes | varchar | null | - | Space-separated |
+| 5 | status | varchar | null | - | active/revoked |
+| 6 | subject | varchar | - | FK→ASPNET_USERS.id | - |
+| 7 | type | varchar | - | - | permanent/ad-hoc |
+| 8 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 9 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 14) `OPENIDDICT_SCOPES`
+Caption: OAuth scopes
+Description: Named permissions exposed by the auth server.
+Purpose: Define reusable permissions for clients.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | varchar | uuid_generate_v7() | PK | - |
+| 2 | name | varchar | - | UK | Scope name |
+| 3 | description | varchar | null | - | - |
+| 4 | descriptions | varchar | null | - | Localized JSON |
+| 5 | display_name | varchar | null | - | - |
+| 6 | display_names | varchar | null | - | Localized JSON |
+| 7 | properties | varchar | null | - | JSON |
+| 8 | resources | varchar | null | - | APIs covered |
+| 9 | tenant_id | uuid | - | FK→TENANTS.id | Partition |
+| 10 | rowVersion | integer | 1 | - | Concurrency token |
+
+### 15) `TENANT_CONFIGURATIONS`
+Caption: Advanced tenant configurations
+Description: Arbitrary key/value tenant configs.
+Purpose: Feature flags and custom settings per tenant.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | uuid | gen_random_uuid() | PK | - |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | - |
+| 3 | config_key | varchar | - | UK(tenant_id, config_key) | - |
+| 4 | config_value | text | null | - | Can be JSON |
+| 5 | config_type | varchar | 'string' | - | string/int/bool/json |
+| 6 | is_encrypted | boolean | false | - | Secrets |
+| 7 | rowVersion | integer | 1 | - | Concurrency token |
+| 8 | created_at | timestamp | now() | - | - |
+| 9 | updated_at | timestamp | now() | - | - |
+
+### 16) `TENANT_GENERAL_CONFIGURATIONS`
+Caption: General tenant settings
+Description: Country, currency, language, and general flags.
+Purpose: Localize and govern tenant-wide behavior.
+| No. | Column | Type | Default | Relation | Remarks |
+|----|--------|------|---------|----------|---------|
+| 1 | id | uuid | gen_random_uuid() | PK | - |
+| 2 | tenant_id | uuid | - | FK→TENANTS.id | - |
+| 3 | country_code | varchar | null | - | ISO-3166 |
+| 4 | currency | varchar | null | - | ISO-4217 |
+| 5 | language_code | varchar | null | - | BCP-47 |
+| 6 | country | varchar | null | - | - |
+| 7 | domain_name | varchar | null | - | - |
+| 8 | contact_number | varchar | null | - | - |
+| 9 | online_bet_support | boolean | true | - | - |
+| 10 | offline_bet_support | boolean | true | - | - |
+| 11 | offline_payout_enabled | boolean | false | - | - |
+| 12 | language_supported | boolean | true | - | - |
+| 13 | underage_limit | varchar | null | - | e.g., 18 |
+| 14 | registration_flow | varchar | null | - | simple/advanced |
+| 15 | rowVersion | integer | 1 | - | Concurrency token |
+| 16 | created_at | timestamp | now() | - | - |
+| 17 | updated_at | timestamp | now() | - | - |
+
 ## 🎯 **Table Relationships Summary**
+Caption: High-level relationships among core entities.
 
 ### **🔗 Core Relationships:**
 - **TENANTS** → Parent of all other tables (1:Many)
 - **ASPNET_USERS** → Core user entity with tenant isolation
-- **AGENTS** → Extends users with agent-specific data
 - **All tables** → Include `tenant_id` for multi-tenant isolation
 
 ### **🔗 Identity Relationships:**
@@ -711,29 +350,7 @@ erDiagram
 - **OPENIDDICT_APPLICATIONS** → **OPENIDDICT_TOKENS** (1:Many)
 - **OPENIDDICT_AUTHORIZATIONS** → **OPENIDDICT_TOKENS** (1:Many)
 
-### **🔗 Agent Relationships:**
-- **ASPNET_USERS** → **AGENTS** (1:1)
-- **AGENTS** → **AGENT_BRANCHES** (1:Many)
-- **AGENTS** → **USER_AGENT_ASSIGNMENTS** (1:Many)
-- **ASPNET_USERS** → **USER_AGENT_ASSIGNMENTS** (1:Many)
-
-## 🎯 **Final Summary**
-
-### **✅ What We've Accomplished:**
-1. **Analyzed your existing Django FlatOddAPI** → Found key patterns for agent management, OTP verification, SMS templates, and configuration
-2. **Optimized for your ASP.NET Core Identity + OpenIddict** → Leveraged your existing authentication infrastructure
-3. **Added multi-tenant support** → Complete data isolation with tenant_id approach
-4. **Incorporated Django patterns** → OTP verification, SMS templates, tenant configurations
-5. **Created comprehensive ER diagram** → Visual representation of the complete User & Identity Service
-
-### **✅ Key Features:**
-- **Multi-tenant architecture** → Supports 40+ tenants with complete isolation
-- **Modern authentication** → ASP.NET Core Identity + OpenIddict OAuth 2.0
-- **Agent system** → Commission tracking, branch management, user assignments
-- **OTP verification** → Phone verification system from your Django implementation
-- **SMS templates** → Notification system from your Django implementation
-- **Configuration management** → Tenant-specific settings from your Django implementation
-- **Complete audit trail** → Security and compliance logging
-
-### **✅ Ready for Implementation:**
-This ER diagram provides the foundation for migrating your Django betting system to .NET Core microservices while preserving your existing business logic and adding modern authentication and multi-tenant capabilities.
+### **🔗 Tenant Relationships:**
+- **TENANTS** → **TENANT_SETTINGS** (1:Many)
+- **TENANTS** → **TENANT_CONFIGURATIONS** (1:Many)
+- **TENANTS** → **TENANT_GENERAL_CONFIGURATIONS** (1:Many)

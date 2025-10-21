@@ -6,6 +6,18 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Convex.Shared.Grpc</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Convex Team</Authors>
+    <Company>Convex</Company>
+    <Description>gRPC communication utilities for Convex microservices</Description>
+    <PackageTags>grpc;communication;microservices;convex</PackageTags>
+    <RepositoryUrl>https://github.com/convex/shared-libraries</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/convex/shared-libraries</PackageProjectUrl>
+    <Copyright>Copyright © Convex 2024</Copyright>
+    <PackageReleaseNotes>Initial release of Convex.Shared.Grpc</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

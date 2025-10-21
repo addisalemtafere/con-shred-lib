@@ -24,4 +24,16 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!-- Local NuGet Feed Configuration -->
+  <PropertyGroup>
+    <PackageOutputPath>../../packages</PackageOutputPath>
+    <LocalNuGetFeed>C:\LocalNuGetFeed</LocalNuGetFeed>
+  </PropertyGroup>
+
+  <!-- Post-build event to push to local feed -->
+  <Target Name="PushToLocalFeed" AfterTargets="Pack">
+    <Exec Command="dotnet nuget push &quot;$(PackageOutputPath)\$(PackageId).$(Version).nupkg&quot; --source &quot;$(LocalNuGetFeed)&quot;" 
+          ContinueOnError="true" />
+  </Target>
+
 </Project>

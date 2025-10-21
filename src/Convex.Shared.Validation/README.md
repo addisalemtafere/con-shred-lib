@@ -7,8 +7,12 @@ Validation utilities for Convex microservices.
 - **FluentValidation Integration**: Built on FluentValidation
 - **Base Validators**: Common validation patterns
 - **Email Validation**: Email format validation
-- **Phone Validation**: Phone number format validation
+- **Phone Validation**: Phone number format validation (International & Ethiopian)
 - **Password Strength**: Password strength validation
+- **Betting Validation**: Stake amounts, odds, bet slip IDs
+- **Ethiopian Validation**: National ID, phone numbers, Birr amounts
+- **Financial Validation**: Transaction references, account numbers, PINs
+- **Age Validation**: Betting eligibility age verification
 - **Custom Validators**: Easy to create custom validators
 
 ## Installation
@@ -99,6 +103,62 @@ RuleFor(x => x.Password)
     .Must(IsStrongPassword).WithMessage("Password must be strong");
 ```
 
+### Ethiopian Phone Number
+```csharp
+RuleFor(x => x.PhoneNumber)
+    .Must(IsValidEthiopianPhoneNumber).WithMessage("Invalid Ethiopian phone number");
+```
+
+### Betting Stake Amount
+```csharp
+RuleFor(x => x.StakeAmount)
+    .Must(x => IsValidStakeAmount(x.StakeAmount, 1m, 100000m))
+    .WithMessage("Stake amount must be between 1 and 100,000 ETB");
+```
+
+### Betting Odds
+```csharp
+RuleFor(x => x.Odds)
+    .Must(x => IsValidOdds(x.Odds, 1.01m, 1000m))
+    .WithMessage("Odds must be between 1.01 and 1000");
+```
+
+### Ethiopian National ID
+```csharp
+RuleFor(x => x.NationalId)
+    .Must(IsValidEthiopianNationalId).WithMessage("Invalid Ethiopian national ID");
+```
+
+### Betting Age Eligibility
+```csharp
+RuleFor(x => x.BirthDate)
+    .Must(IsEligibleBettingAge).WithMessage("Must be at least 18 years old to bet");
+```
+
+### Transaction Reference
+```csharp
+RuleFor(x => x.TransactionReference)
+    .Must(IsValidTransactionReference).WithMessage("Invalid transaction reference format");
+```
+
+### Bet Slip ID
+```csharp
+RuleFor(x => x.BetSlipId)
+    .Must(IsValidBetSlipId).WithMessage("Invalid bet slip ID format");
+```
+
+### PIN Validation
+```csharp
+RuleFor(x => x.Pin)
+    .Must(IsValidPin).WithMessage("PIN must be 4-6 digits");
+```
+
+### Account Number
+```csharp
+RuleFor(x => x.AccountNumber)
+    .Must(IsValidAccountNumber).WithMessage("Invalid account number format");
+```
+
 ## Custom Validators
 
 ### Creating Custom Validators
@@ -107,16 +167,69 @@ public class BetValidator : BaseValidator<Bet>
 {
     public BetValidator()
     {
-        RuleFor(x => x.Amount)
-            .GreaterThan(0).WithMessage("Amount must be greater than 0")
-            .LessThan(10000).WithMessage("Amount cannot exceed $10,000");
+        RuleFor(x => x.StakeAmount)
+            .Must(x => IsValidStakeAmount(x.StakeAmount, 1m, 100000m))
+            .WithMessage("Stake amount must be between 1 and 100,000 ETB");
 
         RuleFor(x => x.Odds)
-            .GreaterThan(1).WithMessage("Odds must be greater than 1")
-            .LessThan(1000).WithMessage("Odds cannot exceed 1000");
+            .Must(x => IsValidOdds(x.Odds, 1.01m, 1000m))
+            .WithMessage("Odds must be between 1.01 and 1000");
 
-        RuleFor(x => x.EventId)
-            .NotEmpty().WithMessage("Event ID is required");
+        RuleFor(x => x.BetSlipId)
+            .NotEmpty().WithMessage("Bet slip ID is required")
+            .Must(IsValidBetSlipId).WithMessage("Invalid bet slip ID format");
+
+        RuleFor(x => x.UserId)
+            .NotEmpty().WithMessage("User ID is required")
+            .Must(IsValidUserId).WithMessage("Invalid user ID format");
+    }
+}
+
+public class UserRegistrationValidator : BaseValidator<UserRegistration>
+{
+    public UserRegistrationValidator()
+    {
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Phone number is required")
+            .Must(IsValidEthiopianPhoneNumber).WithMessage("Invalid Ethiopian phone number");
+
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("Email is required")
+            .Must(IsValidEmail).WithMessage("Invalid email format");
+
+        RuleFor(x => x.NationalId)
+            .NotEmpty().WithMessage("National ID is required")
+            .Must(IsValidEthiopianNationalId).WithMessage("Invalid Ethiopian national ID");
+
+        RuleFor(x => x.BirthDate)
+            .NotEmpty().WithMessage("Birth date is required")
+            .Must(IsEligibleBettingAge).WithMessage("Must be at least 18 years old to bet");
+
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required")
+            .Must(IsStrongPassword).WithMessage("Password must be strong");
+    }
+}
+
+public class TransactionValidator : BaseValidator<Transaction>
+{
+    public TransactionValidator()
+    {
+        RuleFor(x => x.Amount)
+            .Must(x => IsValidEthiopianBirrAmount(x.Amount, 0.01m, 1000000m))
+            .WithMessage("Amount must be between 0.01 and 1,000,000 ETB");
+
+        RuleFor(x => x.TransactionReference)
+            .NotEmpty().WithMessage("Transaction reference is required")
+            .Must(IsValidTransactionReference).WithMessage("Invalid transaction reference format");
+
+        RuleFor(x => x.AccountNumber)
+            .NotEmpty().WithMessage("Account number is required")
+            .Must(IsValidAccountNumber).WithMessage("Invalid account number format");
+
+        RuleFor(x => x.Pin)
+            .NotEmpty().WithMessage("PIN is required")
+            .Must(IsValidPin).WithMessage("PIN must be 4-6 digits");
     }
 }
 ```

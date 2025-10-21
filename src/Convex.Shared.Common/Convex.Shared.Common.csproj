@@ -28,4 +28,9 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!-- NuGet Package Configuration -->
+  <PropertyGroup>
+    <PackageOutputPath>../../packages</PackageOutputPath>
+  </PropertyGroup>
+
 </Project>

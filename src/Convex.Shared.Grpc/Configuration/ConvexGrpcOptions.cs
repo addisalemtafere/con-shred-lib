@@ -56,9 +56,34 @@ public class ConvexGrpcOptions
     public bool EnableCompression { get; set; } = true;
 
     /// <summary>
-    /// Enable TLS encryption
+    /// Enable TLS encryption (disabled for local development, enabled for production)
     /// </summary>
     public bool EnableTls { get; set; } = false;
+
+    /// <summary>
+    /// Enable authentication for gRPC calls (disabled for local development, enabled for production)
+    /// </summary>
+    public bool EnableAuthentication { get; set; } = false;
+
+    /// <summary>
+    /// JWT token for authentication (used when EnableAuthentication is true)
+    /// </summary>
+    public string? JwtToken { get; set; }
+
+    /// <summary>
+    /// API key for service-to-service authentication
+    /// </summary>
+    public string? ApiKey { get; set; }
+
+    /// <summary>
+    /// Service-specific API key for this service (used when calling other services)
+    /// </summary>
+    public string? ServiceApiKey { get; set; }
+
+    /// <summary>
+    /// Valid API keys for incoming requests (used to validate other services calling this service)
+    /// </summary>
+    public List<string> ValidApiKeys { get; set; } = new();
 
     /// <summary>
     /// Service discovery configuration
@@ -71,14 +96,80 @@ public class ConvexGrpcOptions
     public string? ServiceName { get; set; }
 
     /// <summary>
-    /// Server port number for gRPC services
+    /// Server port number for gRPC services (auto-discovered if not set)
     /// </summary>
-    public int ServerPort { get; set; } = 50051;
+    public int ServerPort { get; set; } = 0; // 0 = auto-discover
     
     /// <summary>
     /// Enable or disable the gRPC server
     /// </summary>
     public bool EnableServer { get; set; } = true;
+
+    /// <summary>
+    /// Maximum number of concurrent connections per service
+    /// </summary>
+    public int MaxConcurrentConnections { get; set; } = 100;
+
+    /// <summary>
+    /// Connection pool size for high-performance scenarios
+    /// </summary>
+    public int ConnectionPoolSize { get; set; } = 10;
+
+    /// <summary>
+    /// Enable connection pooling for better performance
+    /// </summary>
+    public bool EnableConnectionPooling { get; set; } = true;
+
+    /// <summary>
+    /// Enable load balancing (handled by external load balancer)
+    /// </summary>
+    public bool EnableLoadBalancing { get; set; } = false;
+
+    /// <summary>
+    /// Circuit breaker threshold for fault tolerance
+    /// </summary>
+    public int CircuitBreakerThreshold { get; set; } = 5;
+
+    /// <summary>
+    /// Circuit breaker timeout in seconds
+    /// </summary>
+    public int CircuitBreakerTimeoutSeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Enable metrics collection for monitoring
+    /// </summary>
+    public bool EnableMetrics { get; set; } = true;
+
+    /// <summary>
+    /// Enable distributed tracing
+    /// </summary>
+    public bool EnableDistributedTracing { get; set; } = true;
+
+    /// <summary>
+    /// Request timeout in seconds
+    /// </summary>
+    public int RequestTimeoutSeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Enable request/response caching
+    /// </summary>
+    public bool EnableCaching { get; set; } = false;
+
+    /// <summary>
+    /// Cache TTL in seconds
+    /// </summary>
+    public int CacheTtlSeconds { get; set; } = 300;
+
+    // Kubernetes integration
+    /// <summary>
+    /// Enable service discovery for Kubernetes
+    /// </summary>
+    public bool EnableServiceDiscovery { get; set; } = true;
+
+    /// <summary>
+    /// Enable client-side load balancing (solves Kubernetes L4 load balancing issue)
+    /// </summary>
+    public bool EnableClientSideLoadBalancing { get; set; } = true;
 }
 
 /// <summary>
@@ -110,4 +201,9 @@ public class GrpcServiceConfig
     /// Service tags for discovery
     /// </summary>
     public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// API key for this specific service (used when other services call this service)
+    /// </summary>
+    public string? ServiceApiKey { get; set; }
 }

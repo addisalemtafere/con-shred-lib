@@ -32,21 +32,65 @@ public static class ServiceCollectionExtensions
         // Configure options
         services.Configure(configureOptions);
 
+        // Register core gRPC services
+        services.AddSingleton<ConvexGrpcConnectionPool>();
+        services.AddSingleton<ConvexGrpcCircuitBreaker>();
+        services.AddSingleton<ConvexGrpcMetrics>();
+        services.AddSingleton<ConvexGrpcPerformanceOptimizer>();
+        
+        // Register Kubernetes services
+        services.AddSingleton<ConvexGrpcKubernetesServiceDiscovery>();
+        services.AddSingleton<ConvexGrpcHealthCheckService>();
+        services.AddSingleton<ConvexGrpcServiceManager>();
+        services.AddSingleton<ConvexGrpcLoadBalancer>();
+        services.AddSingleton<ConvexGrpcLoadBalancedClientFactory>();
+        
         // Register gRPC client factory as singleton
         services.AddSingleton<IGrpcClientFactory, ConvexGrpcClientFactory>();
 
         // Register gRPC server as singleton
         services.AddSingleton<IGrpcServerService, ConvexGrpcServer>();
 
-        // Register gRPC services
+        // Register gRPC services with dynamic configuration
         services.AddGrpc(options =>
         {
             options.EnableDetailedErrors = true;
-            options.MaxReceiveMessageSize = 4 * 1024 * 1024; // 4MB
-            options.MaxSendMessageSize = 4 * 1024 * 1024; // 4MB
+            // Message sizes will be configured from ConvexGrpcOptions
         });
 
         return services;
+    }
+
+    /// <summary>
+    /// Add Convex gRPC services with simple API key authentication
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="isProduction">True for production (with auth/TLS), false for development</param>
+    /// <param name="serviceApiKey">API key for this service (used when calling other services)</param>
+    /// <param name="validApiKeys">Valid API keys for incoming requests (other services calling this service)</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddConvexGrpc(this IServiceCollection services, bool isProduction = false, string? serviceApiKey = null, List<string>? validApiKeys = null)
+    {
+        return services.AddConvexGrpc(options =>
+        {
+            if (isProduction)
+            {
+                // Production configuration
+                options.EnableTls = true; // Enable TLS for production
+                options.EnableAuthentication = true; // Enable authentication for production
+                options.EnableCompression = true; // Enable compression for production
+                options.ServiceApiKey = serviceApiKey; // Set service API key
+                options.ValidApiKeys = validApiKeys ?? new List<string>(); // Set valid API keys
+            }
+            else
+            {
+                // Development configuration
+                options.EnableTls = false; // Disable TLS for local development
+                options.EnableAuthentication = false; // Disable authentication for local development
+                options.EnableCompression = false; // Disable compression for local development
+            }
+            options.ServerPort = 50051; // Default port
+        });
     }
 
     /// <summary>
@@ -61,18 +105,30 @@ public static class ServiceCollectionExtensions
         // Configure from appsettings.json
         services.Configure<ConvexGrpcOptions>(configuration.GetSection(sectionName));
 
+        // Register core gRPC services
+        services.AddSingleton<ConvexGrpcConnectionPool>();
+        services.AddSingleton<ConvexGrpcCircuitBreaker>();
+        services.AddSingleton<ConvexGrpcMetrics>();
+        services.AddSingleton<ConvexGrpcPerformanceOptimizer>();
+        
+        // Register Kubernetes services
+        services.AddSingleton<ConvexGrpcKubernetesServiceDiscovery>();
+        services.AddSingleton<ConvexGrpcHealthCheckService>();
+        services.AddSingleton<ConvexGrpcServiceManager>();
+        services.AddSingleton<ConvexGrpcLoadBalancer>();
+        services.AddSingleton<ConvexGrpcLoadBalancedClientFactory>();
+        
         // Register gRPC client factory as singleton
         services.AddSingleton<IGrpcClientFactory, ConvexGrpcClientFactory>();
 
         // Register gRPC server as singleton
         services.AddSingleton<IGrpcServerService, ConvexGrpcServer>();
 
-        // Register gRPC services
+        // Register gRPC services with dynamic configuration
         services.AddGrpc(options =>
         {
             options.EnableDetailedErrors = true;
-            options.MaxReceiveMessageSize = 4 * 1024 * 1024; // 4MB
-            options.MaxSendMessageSize = 4 * 1024 * 1024; // 4MB
+            // Message sizes will be configured from ConvexGrpcOptions
         });
 
         return services;
