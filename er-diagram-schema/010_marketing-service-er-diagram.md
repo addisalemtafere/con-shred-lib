@@ -126,28 +126,31 @@ The Marketing Service handles all marketing activities, bonus management, loyalt
 - `CASHBACK_SETTINGS` - Cashback configurations
 - `USER_CASHBACKS` - User cashback tracking
 
-#### **👥 7. REFERRAL SYSTEM (2 tables)**
+#### **🎫 7. CLAIMS MANAGEMENT (1 table)**
+- `MEMBER_CLAIMS` - User claim management for bonuses, refunds, and compensation
+
+#### **👥 8. REFERRAL SYSTEM (2 tables)**
 - `REFERRAL_PROGRAMS` - Referral program configurations
 - `USER_REFERRALS` - User referral tracking
 
-#### **📝 8. PROMOTION MANAGEMENT (1 table)**
+#### **📝 9. PROMOTION MANAGEMENT (1 table)**
 - `PROMOTION_DESCRIPTIONS` - Promotion descriptions
 
-#### **📊 9. ANALYTICS (1 table)**
+#### **📊 10. ANALYTICS (1 table)**
 - `MARKETING_ANALYTICS` - Marketing analytics and reporting
 
-#### **📋 10. AUDIT & LOGGING (1 table)**
+#### **📋 11. AUDIT & LOGGING (1 table)**
 - `AUDIT_LOGS` - Complete audit trail
 
-#### **🔧 11. SYSTEM CONFIGURATIONS (3 tables)**
+#### **🔧 12. SYSTEM CONFIGURATIONS (3 tables)**
 - `STREAK_SETTINGS` - User streak tracking configuration
 - `CLIENT_SETTINGS` - Client-specific settings
 - `APP_SETTINGS` - Application-level settings
 
-#### **⚙️ 12. MARKETING CONFIGURATIONS (1 table)**
+#### **⚙️ 13. MARKETING CONFIGURATIONS (1 table)**
 - `TENANT_REFERRAL_CONFIGURATIONS` - Referral system settings per tenant
 
-## 🎯 **Total: 24 Tables**
+## 🎯 **Total: 25 Tables**
 
 ### **✅ Complete Coverage:**
 1. **Bonus Management** (5 tables)
@@ -155,12 +158,13 @@ The Marketing Service handles all marketing activities, bonus management, loyalt
 3. **Loyalty System** (3 tables)
 4. **Campaign Management** (3 tables)
 5. **Cashback System** (2 tables)
-6. **Referral System** (2 tables)
-7. **Promotion Management** (1 table)
-8. **Analytics** (1 table)
-9. **Audit & Logging** (1 table)
-10. **System Configurations** (3 tables)
-11. **Marketing Configurations** (1 table)
+6. **Claims Management** (1 table)
+7. **Referral System** (2 tables)
+8. **Promotion Management** (1 table)
+9. **Analytics** (1 table)
+10. **Audit & Logging** (1 table)
+11. **System Configurations** (3 tables)
+12. **Marketing Configurations** (1 table)
 
 ### **✅ Migration Strategy:**
 - **Preserve Business Logic** → Keep your current bonus and loyalty logic
@@ -196,4 +200,41 @@ The Marketing Service handles all marketing activities, bonus management, loyalt
 
 ---
 
-**This Marketing Service ER diagram provides complete marketing automation, bonus management, loyalty programs, and campaign management capabilities with multi-tenant support for your betting platform!** 🎯
+## 📚 **Detailed Table Definitions**
+
+### **MEMBER_CLAIMS** - User Claims Management
+
+> **Purpose:** User claim management for bonuses, refunds, and compensation
+> 
+> **When to Use:**
+> - **Bonus Claims** → Users request bonus credits from marketing service
+> - **Refund Requests** → Users claim refunds for cancelled bets or technical issues
+> - **Compensation Claims** → Users request compensation for service disruptions
+> - **Rebate Claims** → Users claim cashback or rebate rewards
+> - **Dispute Resolution** → Handle user complaints and compensation requests
+> - **Approval Workflow** → Admin approval process for high-value claims
+> 
+> **Key Operations:**
+> - Submit claim request from user
+> - Review and approve claims by admin
+> - Process approved claims to wallet
+> - Track claim status and history
+> - Generate claim reports
+> - Handle claim disputes
+
+| **Column** | **Type** | **Default** | **Constraints** | **Description** |
+|------------|----------|-------------|-----------------|-----------------|
+| **id** | `uuid` | `gen_random_uuid()` | `PRIMARY KEY` | Unique claim identifier |
+| **tenant_id** | `uuid` | - | `NOT NULL, FK→TENANTS.id` | Multi-tenant isolation |
+| **user_id** | `varchar(50)` | - | `NOT NULL, FK→ASPNET_USERS.id` | Claim owner |
+| **wallet_id** | `uuid` | - | `NOT NULL, FK→WALLETS.id` | Target wallet (Wallet Service reference) |
+| **claim_type** | `varchar(30)` | - | `NOT NULL` | Claim type (bonus/refund/compensation/rebate/cashback) |
+| **amount** | `decimal(18,8)` | - | `NOT NULL, CHECK > 0` | Claim amount (8 decimals for crypto) |
+| **status** | `varchar(20)` | `'pending'` | `NOT NULL` | Status (pending/approved/rejected/processed) |
+| **description** | `text` | `null` | - | Claim description |
+| **approved_by** | `varchar(50)` | `null` | `FK→ASPNET_USERS.id` | Approver |
+| **created_at** | `timestamp` | `now()` | `NOT NULL` | Claim timestamp |
+| **processed_at** | `timestamp` | `null` | - | Processing timestamp |
+| **rowversion** | `bytea` | `gen_random_bytes(8)` | `NOT NULL` | Row version for optimistic concurrency |
+
+**This Marketing Service ER diagram provides complete marketing automation, bonus management, loyalty programs, campaign management, and claims management capabilities with multi-tenant support for your betting platform!** 🎯
