@@ -717,4 +717,269 @@ public class GrpcHelper
 10. API Gateway → Client: HTTP response
 ```
 
+## 🚀 **gRPC Service Definition - Implementation Ready**
+
+### **🔧 API Gateway Service (api_gateway.proto)**
+
+```protobuf
+syntax = "proto3";
+
+package api_gateway.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// API Gateway Service - Central routing and security service
+service ApiGatewayService {
+  // Authentication & Authorization
+  rpc AuthenticateRequest(AuthenticateRequest) returns (AuthenticationResponse);
+  rpc AuthorizeRequest(AuthorizeRequest) returns (AuthorizationResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (TokenValidationResponse);
+  
+  // Request Routing
+  rpc RouteRequest(RouteRequest) returns (RouteResponse);
+  rpc GetServiceEndpoint(GetServiceEndpointRequest) returns (ServiceEndpointResponse);
+  rpc LoadBalanceRequest(LoadBalanceRequest) returns (LoadBalanceResponse);
+  
+  // Rate Limiting & Throttling
+  rpc CheckRateLimit(RateLimitRequest) returns (RateLimitResponse);
+  rpc UpdateRateLimit(RateLimitUpdateRequest) returns (RateLimitUpdateResponse);
+  rpc GetRateLimitStatus(RateLimitStatusRequest) returns (RateLimitStatusResponse);
+  
+  // Request/Response Processing
+  rpc ProcessRequest(ProcessRequestRequest) returns (ProcessRequestResponse);
+  rpc ProcessResponse(ProcessResponseRequest) returns (ProcessResponseResponse);
+  rpc TransformRequest(TransformRequestRequest) returns (TransformRequestResponse);
+  rpc TransformResponse(TransformResponseRequest) returns (TransformResponseResponse);
+  
+  // Security & Monitoring
+  rpc LogRequest(LogRequestRequest) returns (LogRequestResponse);
+  rpc MonitorHealth(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc GetMetrics(MetricsRequest) returns (MetricsResponse);
+  
+  // Configuration Management
+  rpc GetRoutingConfig(RoutingConfigRequest) returns (RoutingConfigResponse);
+  rpc UpdateRoutingConfig(UpdateRoutingConfigRequest) returns (UpdateRoutingConfigResponse);
+  rpc GetSecurityConfig(SecurityConfigRequest) returns (SecurityConfigResponse);
+  rpc UpdateSecurityConfig(UpdateSecurityConfigRequest) returns (UpdateSecurityConfigResponse);
+}
+
+// Request/Response Messages
+message AuthenticateRequest {
+  string token = 1;
+  string client_ip = 2;
+  string user_agent = 3;
+  string tenant_id = 4;
+}
+
+message AuthenticationResponse {
+  bool is_authenticated = 1;
+  string user_id = 2;
+  string tenant_id = 3;
+  repeated string roles = 4;
+  repeated string permissions = 5;
+  string error_message = 6;
+}
+
+message AuthorizeRequest {
+  string user_id = 1;
+  string resource = 2;
+  string action = 3;
+  string tenant_id = 4;
+}
+
+message AuthorizationResponse {
+  bool is_authorized = 1;
+  string reason = 2;
+  repeated string required_permissions = 3;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+  string tenant_id = 2;
+}
+
+message TokenValidationResponse {
+  bool is_valid = 1;
+  string user_id = 2;
+  string tenant_id = 3;
+  google.protobuf.Timestamp expires_at = 4;
+  repeated string claims = 5;
+}
+
+message RouteRequest {
+  string method = 1;
+  string path = 2;
+  string tenant_id = 3;
+  string user_id = 4;
+}
+
+message RouteResponse {
+  string service_name = 1;
+  string endpoint = 2;
+  string protocol = 3;
+  map<string, string> headers = 4;
+  string error_message = 5;
+}
+
+message GetServiceEndpointRequest {
+  string service_name = 1;
+  string tenant_id = 2;
+}
+
+message ServiceEndpointResponse {
+  string endpoint = 1;
+  string protocol = 2;
+  bool is_healthy = 3;
+  int32 load_factor = 4;
+}
+
+message LoadBalanceRequest {
+  string service_name = 1;
+  string tenant_id = 2;
+  string user_id = 3;
+}
+
+message LoadBalanceResponse {
+  string selected_endpoint = 1;
+  string load_balancer_algorithm = 2;
+  int32 current_load = 3;
+}
+
+message RateLimitRequest {
+  string user_id = 1;
+  string tenant_id = 2;
+  string endpoint = 3;
+  string client_ip = 4;
+}
+
+message RateLimitResponse {
+  bool is_allowed = 1;
+  int32 remaining_requests = 2;
+  int32 reset_time_seconds = 3;
+  string limit_type = 4;
+}
+
+message ProcessRequestRequest {
+  string method = 1;
+  string path = 2;
+  map<string, string> headers = 3;
+  bytes body = 4;
+  string user_id = 5;
+  string tenant_id = 6;
+}
+
+message ProcessRequestResponse {
+  bool should_continue = 1;
+  map<string, string> modified_headers = 2;
+  bytes modified_body = 3;
+  string error_message = 4;
+}
+
+message ProcessResponseRequest {
+  int32 status_code = 1;
+  map<string, string> headers = 2;
+  bytes body = 3;
+  string user_id = 4;
+  string tenant_id = 5;
+}
+
+message ProcessResponseResponse {
+  int32 modified_status_code = 1;
+  map<string, string> modified_headers = 2;
+  bytes modified_body = 3;
+  bool should_log = 4;
+}
+
+message LogRequestRequest {
+  string method = 1;
+  string path = 2;
+  int32 status_code = 3;
+  int64 response_time_ms = 4;
+  string user_id = 5;
+  string tenant_id = 6;
+  string client_ip = 7;
+  string user_agent = 8;
+}
+
+message LogRequestResponse {
+  bool success = 1;
+  string log_id = 2;
+}
+
+message HealthCheckRequest {
+  string service_name = 1;
+}
+
+message HealthCheckResponse {
+  bool is_healthy = 1;
+  string status = 2;
+  map<string, string> details = 3;
+}
+
+message MetricsRequest {
+  string metric_type = 1;
+  string time_range = 2;
+  string tenant_id = 3;
+}
+
+message MetricsResponse {
+  map<string, double> metrics = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+message RoutingConfigRequest {
+  string tenant_id = 1;
+}
+
+message RoutingConfigResponse {
+  map<string, string> routes = 1;
+  map<string, string> service_endpoints = 2;
+  map<string, string> load_balancing = 3;
+}
+
+message SecurityConfigRequest {
+  string tenant_id = 1;
+}
+
+message SecurityConfigResponse {
+  map<string, string> security_policies = 1;
+  map<string, string> rate_limits = 2;
+  map<string, string> authentication = 3;
+}
+```
+
+### **🔗 External Service Communication Patterns**
+
+#### **Identity Service Integration:**
+- **Authentication** → `AuthenticateRequest` → Identity Service
+- **Authorization** → `AuthorizeRequest` → Identity Service  
+- **Token Validation** → `ValidateTokenRequest` → Identity Service
+
+#### **Backend Services Integration:**
+- **Wallet Service** → Route wallet requests with user context
+- **Payment Service** → Route payment requests with security validation
+- **Sportsbook Service** → Route betting requests with authorization
+- **All Services** → Centralized routing and security enforcement
+
+### **📊 Implementation Guidelines**
+
+#### **Service Configuration:**
+- Configure routing rules for each backend service
+- Set up load balancing algorithms (round-robin, least-connections, etc.)
+- Define rate limiting policies per tenant and endpoint
+- Configure security policies and authentication requirements
+
+#### **Error Handling:**
+- Implement circuit breaker patterns for service failures
+- Handle authentication/authorization failures gracefully
+- Provide meaningful error messages to clients
+- Log all security violations and failed requests
+
+#### **Monitoring & Health Checks:**
+- Monitor service health and availability
+- Track request/response metrics and performance
+- Alert on rate limit violations and security breaches
+- Generate reports on API usage and patterns
+
 **This API Gateway Service ER diagram provides complete API management, service discovery, and routing capabilities for your betting platform!** 🎯

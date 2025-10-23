@@ -42,6 +42,7 @@ The Wallet Service handles all wallet management, balance tracking, and internal
 ### **✅ Balance Management**
 - **Total Balance** → Complete wallet balance per currency
 - **Available Balance** → Available for betting and withdrawal
+- **Stake Balance** → Stake balance (not withdrawable)
 - **Locked Balance** → Temporarily unavailable funds
 - **Bonus Balance** → Promotional and bonus funds
 
@@ -83,6 +84,7 @@ The Wallet Service handles all wallet management, balance tracking, and internal
 | **currency** | `varchar(10)` | `'USD'` | `NOT NULL` | Wallet currency (USD, EUR, BTC, ETH, USDT, BNB) |
 | **total_balance** | `decimal(18,8)` | `0.00000000` | `NOT NULL, CHECK >= 0` | Total wallet balance (8 decimals for crypto) |
 | **available_balance** | `decimal(18,8)` | `0.00000000` | `NOT NULL, CHECK >= 0` | Available for betting/withdrawal |
+| **stake_balance** | `decimal(18,8)` | `0.00000000` | `NOT NULL, CHECK >= 0` | Stake balance (not withdrawable) |
 | **locked_balance** | `decimal(18,8)` | `0.00000000` | `NOT NULL, CHECK >= 0` | Temporarily locked funds |
 | **bonus_balance** | `decimal(18,8)` | `0.00000000` | `NOT NULL, CHECK >= 0` | Promotional/bonus funds |
 | **crypto_address** | `varchar(100)` | `null` | - | Crypto wallet address (for crypto wallets) |
@@ -182,7 +184,7 @@ User: John Smith
 | **user_id** | `varchar(50)` | - | `NOT NULL, FK→ASPNET_USERS.id` | Transaction owner |
 | **transaction_id** | `uuid` | - | `NOT NULL, FK→WALLET_TRANSACTIONS.id` | Related transaction |
 | **entry_type** | `varchar(20)` | - | `NOT NULL` | Entry type (debit/credit) |
-| **account_type** | `varchar(30)` | - | `NOT NULL` | Account type (total_balance/available_balance/locked_balance/bonus_balance) |
+| **account_type** | `varchar(30)` | - | `NOT NULL` | Account type (total_balance/available_balance/stake_balance/locked_balance/bonus_balance) |
 | **amount** | `decimal(18,8)` | - | `NOT NULL, CHECK > 0` | Entry amount (8 decimals for crypto) |
 | **balance_before** | `decimal(18,8)` | - | `NOT NULL, CHECK >= 0` | Balance before entry |
 | **balance_after** | `decimal(18,8)` | - | `NOT NULL, CHECK >= 0` | Balance after entry |
@@ -285,8 +287,8 @@ User: John Smith
   "action": "bet_placed",
   "entity_type": "wallet_transaction", 
   "entity_id": "tx_user_002",
-  "old_values": {"available_balance": 1500.00, "locked_balance": 0.00},
-  "new_values": {"available_balance": 1300.00, "locked_balance": 200.00},
+  "old_values": {"available_balance": 1500.00, "stake_balance": 0.00, "locked_balance": 0.00},
+  "new_values": {"available_balance": 1300.00, "stake_balance": 200.00, "locked_balance": 0.00},
   "description": "User placed $200 bet on Manchester United vs Liverpool"
 }
 
@@ -295,8 +297,8 @@ User: John Smith
   "action": "bet_won",
   "entity_type": "wallet_transaction",
   "entity_id": "tx_user_003", 
-  "old_values": {"available_balance": 1300.00, "locked_balance": 200.00},
-  "new_values": {"available_balance": 1500.00, "locked_balance": 0.00},
+  "old_values": {"available_balance": 1300.00, "stake_balance": 200.00, "locked_balance": 0.00},
+  "new_values": {"available_balance": 1500.00, "stake_balance": 0.00, "locked_balance": 0.00},
   "description": "User won $200 bet, total payout $400"
 }
 ```
@@ -308,8 +310,8 @@ User: John Smith
   "action": "agent_cash_collection",
   "entity_type": "agent_wallet_transaction",
   "entity_id": "tx_agent_001",
-  "old_values": {"available_balance": 500.00, "total_balance": 500.00},
-  "new_values": {"available_balance": 600.00, "total_balance": 600.00},
+  "old_values": {"available_balance": 500.00, "stake_balance": 0.00, "total_balance": 500.00},
+  "new_values": {"available_balance": 600.00, "stake_balance": 0.00, "total_balance": 600.00},
   "description": "Agent John collected $100 cash from customer Alice"
 }
 
@@ -318,8 +320,8 @@ User: John Smith
   "action": "agent_service_credit",
   "entity_type": "agent_wallet_transaction",
   "entity_id": "tx_agent_002",
-  "old_values": {"available_balance": 600.00, "commission_balance": 50.00},
-  "new_values": {"available_balance": 550.00, "commission_balance": 50.00},
+  "old_values": {"available_balance": 600.00, "stake_balance": 0.00, "commission_balance": 50.00},
+  "new_values": {"available_balance": 550.00, "stake_balance": 50.00, "commission_balance": 50.00},
   "description": "Agent John provided $50 credit to customer Bob for bet placement"
 }
 
@@ -485,7 +487,7 @@ User: John Smith
 | **agent_id** | `varchar(50)` | - | `NOT NULL, FK→ASPNET_USERS.id` | Agent performing transaction |
 | **transaction_id** | `uuid` | - | `NOT NULL, FK→AGENT_WALLET_TRANSACTIONS.id` | Related transaction |
 | **entry_type** | `varchar(20)` | - | `NOT NULL` | Entry type (debit/credit) |
-| **account_type** | `varchar(30)` | - | `NOT NULL` | Account type (total_balance/available_balance/locked_balance/commission_balance) |
+| **account_type** | `varchar(30)` | - | `NOT NULL` | Account type (total_balance/available_balance/stake_balance/locked_balance/commission_balance) |
 | **amount** | `decimal(18,8)` | - | `NOT NULL, CHECK > 0` | Entry amount (8 decimals for crypto) |
 | **balance_before** | `decimal(18,8)` | - | `NOT NULL, CHECK >= 0` | Balance before entry |
 | **balance_after** | `decimal(18,8)` | - | `NOT NULL, CHECK >= 0` | Balance after entry |
@@ -561,8 +563,8 @@ service WalletService {
   rpc CreateWallet(CreateWalletRequest) returns (CreateWalletResponse);
   
   // Get user's wallets
-  rpc GetUserWallets(GetUserWalletsRequest) returns (GetUserWalletsResponse);
-  
+rpc GetUserWallets(GetUserWalletsRequest) returns (GetUserWalletsResponse);
+
   // Get specific wallet
   rpc GetWallet(GetWalletRequest) returns (GetWalletResponse);
   
@@ -611,14 +613,14 @@ service WalletService {
   // TRANSACTION HISTORY
   // ============================================================================
   
-  // Get transaction history
-  rpc GetTransactionHistory(GetTransactionHistoryRequest) returns (GetTransactionHistoryResponse);
-  
-  // Get transaction by ID
-  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
-  
-  // Search transactions
-  rpc SearchTransactions(SearchTransactionsRequest) returns (SearchTransactionsResponse);
+// Get transaction history
+rpc GetTransactionHistory(GetTransactionHistoryRequest) returns (GetTransactionHistoryResponse);
+
+// Get transaction by ID
+rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+
+// Search transactions
+rpc SearchTransactions(SearchTransactionsRequest) returns (SearchTransactionsResponse);
 
   // ============================================================================
   // AGENT WALLET OPERATIONS
@@ -654,13 +656,13 @@ service WalletService {
   // ============================================================================
   
   // Get tenant configuration
-  rpc GetTenantConfiguration(GetTenantConfigurationRequest) returns (GetTenantConfigurationResponse);
-  
-  // Update tenant configuration
-  rpc UpdateTenantConfiguration(UpdateTenantConfigurationRequest) returns (UpdateTenantConfigurationResponse);
-  
-  // Validate transaction limits
-  rpc ValidateLimits(ValidateLimitsRequest) returns (ValidateLimitsResponse);
+rpc GetTenantConfiguration(GetTenantConfigurationRequest) returns (GetTenantConfigurationResponse);
+
+// Update tenant configuration
+rpc UpdateTenantConfiguration(UpdateTenantConfigurationRequest) returns (UpdateTenantConfigurationResponse);
+
+// Validate transaction limits
+rpc ValidateLimits(ValidateLimitsRequest) returns (ValidateLimitsResponse);
 
   // ============================================================================
   // AUDIT & SECURITY
@@ -755,8 +757,9 @@ message GetBalanceResponse {
   string currency = 2;
   string total_balance = 3;
   string available_balance = 4;
-  string locked_balance = 5;
-  string bonus_balance = 6;
+  string stake_balance = 5;
+  string locked_balance = 6;
+  string bonus_balance = 7;
 }
 
 message UpdateBalanceRequest {
@@ -764,9 +767,10 @@ message UpdateBalanceRequest {
   string wallet_id = 2;
   string total_balance = 3;
   string available_balance = 4;
-  string locked_balance = 5;
-  string bonus_balance = 6;
-  string reason = 7;
+  string stake_balance = 5;
+  string locked_balance = 6;
+  string bonus_balance = 7;
+  string reason = 8;
 }
 
 message UpdateBalanceResponse {
@@ -1155,15 +1159,16 @@ message Wallet {
   string currency = 5;
   string total_balance = 6;
   string available_balance = 7;
-  string locked_balance = 8;
-  string bonus_balance = 9;
-  string crypto_address = 10;
-  string crypto_network = 11;
-  bool is_crypto_wallet = 12;
-  bool is_active = 13;
-  bool is_primary = 14;
-  google.protobuf.Timestamp created_at = 15;
-  google.protobuf.Timestamp updated_at = 16;
+  string stake_balance = 8;
+  string locked_balance = 9;
+  string bonus_balance = 10;
+  string crypto_address = 11;
+  string crypto_network = 12;
+  bool is_crypto_wallet = 13;
+  bool is_active = 14;
+  bool is_primary = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
 }
 
 message Transaction {
@@ -1188,13 +1193,14 @@ message AgentWallet {
   string currency = 6;
   string total_balance = 7;
   string available_balance = 8;
-  string locked_balance = 9;
-  string commission_balance = 10;
-  string credit_limit = 11;
-  bool is_active = 12;
-  bool is_offline_enabled = 13;
-  google.protobuf.Timestamp created_at = 14;
-  google.protobuf.Timestamp updated_at = 15;
+  string stake_balance = 9;
+  string locked_balance = 10;
+  string commission_balance = 11;
+  string credit_limit = 12;
+  bool is_active = 13;
+  bool is_offline_enabled = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
 }
 
 message AgentTransaction {
@@ -1459,6 +1465,7 @@ erDiagram
         varchar currency
         decimal total_balance
         decimal available_balance
+        decimal stake_balance
         decimal locked_balance
         decimal bonus_balance
         varchar crypto_address
@@ -1511,6 +1518,7 @@ erDiagram
         varchar currency
         decimal total_balance
         decimal available_balance
+        decimal stake_balance
         decimal locked_balance
         decimal commission_balance
         decimal credit_limit
